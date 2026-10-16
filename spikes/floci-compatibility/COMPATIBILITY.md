@@ -55,10 +55,10 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 
 | Operation or behaviour | Status | Evidence |
 |---|---|---|
-| Create a table | Not tested | Pending |
-| Write and read an item | Not tested | Pending |
-| Conditional write succeeds initially | Not tested | Pending |
-| Repeated conditional write is rejected | Not tested | Pending |
+| Create a table | Pass | Created active table `outagegym-spike-idempotency` with a string partition key and on-demand billing |
+| Write and read an item | Pass | Stored an idempotency claim and retrieved it with a consistent read |
+| Conditional write succeeds initially | Pass | `attribute_not_exists(idempotencyKey)` allowed the first claim |
+| Repeated conditional write is rejected | Pass | The repeated claim returned `ConditionalCheckFailedException` and AWS CLI exit code `254` |
 
 ## Explicitly deferred services
 
@@ -70,4 +70,4 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 
 ## Current conclusion
 
-Floci `2.3.0` is provisionally compatible with the SQS operations and visibility-timeout redelivery behaviour required by `inc-001`. A final go/no-go decision requires DynamoDB conditional-write, application SDK, Terraform, reset, and safety-guard results.
+Floci `2.3.0` is provisionally compatible with the SQS operations, visibility-timeout redelivery, and DynamoDB conditional-write behaviour required by `inc-001`. A final go/no-go decision requires application SDK, Terraform, reset, and safety-guard results.
