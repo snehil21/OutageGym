@@ -16,6 +16,9 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 | Compatibility-image standalone Python | `3.9.25` |
 | boto3 | `1.42.97` |
 | botocore | `1.42.97` |
+| Node.js | `22.23.3` |
+| npm | `10.9.9` |
+| AWS SDK for JavaScript v3 clients | `3.1152.0` |
 | Tool-container architecture | `aarch64` |
 
 ## Runtime and safety
@@ -29,7 +32,9 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 | Floci starts without a Docker socket mount | Pass | The Compose definition has no socket mount and the service became healthy |
 | Client uses fake credentials | Pass | The tool service uses `outagegym-local` credentials |
 | Client disables metadata credential lookup | Pass | `AWS_EC2_METADATA_DISABLED=true` |
-| Requests are blocked from reaching real AWS | Not tested | Explicit local endpoint is configured, but a hard guard has not been implemented or tested |
+| JavaScript SDK check blocks non-local endpoints | Pass | A real-looking SQS endpoint was rejected before client construction with exit code `1` |
+| JavaScript SDK check blocks non-local credentials | Pass | Credentials other than the fixed OutageGym values were rejected before client construction with exit code `1` |
+| All tool paths are blocked from reaching real AWS | Not tested | The JavaScript check has a hard guard; AWS CLI and future Terraform paths still rely on explicit endpoint configuration |
 | In-memory state resets cleanly | Pass | A queue and table existed before container removal and were absent after recreation |
 
 ## Client compatibility
@@ -37,7 +42,7 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 | Client | Status | Evidence |
 |---|---|---|
 | AWS CLI | Pass | `sqs list-queues` returned a valid response from Floci |
-| AWS SDK for JavaScript v3 | Not tested | Pending |
+| AWS SDK for JavaScript v3 | Pass | Pinned SQS and DynamoDB clients connected through `http://floci:4566` and returned valid empty-list responses |
 | boto3 | Pass with caveat | boto3 connected to SQS and DynamoDB through `http://floci:4566`; the compatibility image's standalone Python runtime is unsupported |
 | Terraform AWS provider | Not tested | Pending |
 
@@ -77,4 +82,4 @@ The Floci `2.3.0-compat` image is suitable for AWS CLI checks, but its standalon
 
 ## Current conclusion
 
-Floci `2.3.0` is provisionally compatible with the AWS CLI, boto3, SQS operations, visibility-timeout redelivery, DynamoDB conditional-write behaviour, and clean in-memory reset required by `inc-001`. A final go/no-go decision requires JavaScript SDK v3, Terraform, and safety-guard results.
+Floci `2.3.0` is provisionally compatible with the AWS CLI, boto3, AWS SDK for JavaScript v3, SQS operations, visibility-timeout redelivery, DynamoDB conditional-write behaviour, and clean in-memory reset required by `inc-001`. The JavaScript check rejects non-local endpoints and credentials before client construction. A final go/no-go decision requires Terraform testing and a decision on whether the MVP needs a cross-client network guard in addition to explicit local endpoint configuration.

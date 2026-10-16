@@ -28,3 +28,21 @@ services:
     depends_on:
       floci:
         condition: service_healthy
+
+  node:
+    image: node:22.23.3-alpine3.24
+    profiles:
+      - tools
+    working_dir: /workspace
+    volumes:
+      - ./sdk-js:/workspace
+    environment:
+      AWS_ENDPOINT_URL: http://floci:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: outagegym-local
+      AWS_SECRET_ACCESS_KEY: outagegym-local-only
+      AWS_EC2_METADATA_DISABLED: "true"
+    depends_on:
+      floci:
+        condition: service_healthy
