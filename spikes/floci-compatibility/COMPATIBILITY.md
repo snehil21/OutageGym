@@ -12,7 +12,10 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 | Floci runtime | `2.3.0` |
 | Floci compatibility image | `2.3.0-compat` |
 | AWS CLI | `2.36.24` |
-| AWS CLI Python runtime | `3.14.6` |
+| AWS CLI bundled Python runtime | `3.14.6` |
+| Compatibility-image standalone Python | `3.9.25` |
+| boto3 | `1.42.97` |
+| botocore | `1.42.97` |
 | Tool-container architecture | `aarch64` |
 
 ## Runtime and safety
@@ -35,7 +38,7 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 |---|---|---|
 | AWS CLI | Pass | `sqs list-queues` returned a valid response from Floci |
 | AWS SDK for JavaScript v3 | Not tested | Pending |
-| boto3 | Not tested | Pending |
+| boto3 | Pass with caveat | boto3 connected to SQS and DynamoDB through `http://floci:4566`; the compatibility image's standalone Python runtime is unsupported |
 | Terraform AWS provider | Not tested | Pending |
 
 ## SQS compatibility
@@ -60,6 +63,10 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 | Conditional write succeeds initially | Pass | `attribute_not_exists(idempotencyKey)` allowed the first claim |
 | Repeated conditional write is rejected | Pass | The repeated claim returned `ConditionalCheckFailedException` and AWS CLI exit code `254` |
 
+## Tooling caveat
+
+The Floci `2.3.0-compat` image is suitable for AWS CLI checks, but its standalone `python` executable is Python `3.9.25`. boto3 emitted a deprecation warning because that runtime is outside its supported window. OutageGym must use a separately pinned, supported Python image for future boto3 tests and behavioural assessment tooling.
+
 ## Explicitly deferred services
 
 | Service area | Reason |
@@ -70,4 +77,4 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 
 ## Current conclusion
 
-Floci `2.3.0` is provisionally compatible with the SQS operations, visibility-timeout redelivery, DynamoDB conditional-write behaviour, and clean in-memory reset required by `inc-001`. A final go/no-go decision requires application SDK, Terraform, and safety-guard results.
+Floci `2.3.0` is provisionally compatible with the AWS CLI, boto3, SQS operations, visibility-timeout redelivery, DynamoDB conditional-write behaviour, and clean in-memory reset required by `inc-001`. A final go/no-go decision requires JavaScript SDK v3, Terraform, and safety-guard results.
