@@ -1,0 +1,14 @@
+{
+  "name": "@outagegym/floci-sdk-js-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.9.9",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1152.0",
+    "@aws-sdk/client-sqs": "3.1152.0"
+  }
+}
