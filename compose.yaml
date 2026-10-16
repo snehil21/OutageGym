@@ -1,0 +1,17 @@
+services:
+  floci:
+    image: floci/floci:2.3.0
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      FLOCI_DEFAULT_REGION: us-east-1
+      FLOCI_DEFAULT_ACCOUNT_ID: "000000000000"
+      FLOCI_HOSTNAME: floci
+      FLOCI_BASE_URL: http://floci:4566
+      FLOCI_STORAGE_MODE: memory
+    networks:
+      - lab
+
+networks:
+  lab:
+    driver: bridge
