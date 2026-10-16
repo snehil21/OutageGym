@@ -12,6 +12,26 @@ services:
     networks:
       - lab
 
+  aws:
+    image: floci/floci:2.3.0-compat
+    profiles:
+      - tools
+    entrypoint:
+      - aws
+    environment:
+      AWS_ENDPOINT_URL: http://floci:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: outagegym-local
+      AWS_SECRET_ACCESS_KEY: outagegym-local-only
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_PAGER: ""
+    depends_on:
+      floci:
+        condition: service_healthy
+    networks:
+      - lab
+
 networks:
   lab:
     driver: bridge
