@@ -27,7 +27,7 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 | Client uses fake credentials | Pass | The tool service uses `outagegym-local` credentials |
 | Client disables metadata credential lookup | Pass | `AWS_EC2_METADATA_DISABLED=true` |
 | Requests are blocked from reaching real AWS | Not tested | Explicit local endpoint is configured, but a hard guard has not been implemented or tested |
-| In-memory state resets cleanly | Not tested | Reset behaviour has not been exercised yet |
+| In-memory state resets cleanly | Pass | A queue and table existed before container removal and were absent after recreation |
 
 ## Client compatibility
 
@@ -70,4 +70,4 @@ This matrix records behaviour observed during the `inc-001` feasibility spike. A
 
 ## Current conclusion
 
-Floci `2.3.0` is provisionally compatible with the SQS operations, visibility-timeout redelivery, and DynamoDB conditional-write behaviour required by `inc-001`. A final go/no-go decision requires application SDK, Terraform, reset, and safety-guard results.
+Floci `2.3.0` is provisionally compatible with the SQS operations, visibility-timeout redelivery, DynamoDB conditional-write behaviour, and clean in-memory reset required by `inc-001`. A final go/no-go decision requires application SDK, Terraform, and safety-guard results.
