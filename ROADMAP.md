@@ -199,45 +199,47 @@ make stop
 
 ### Compatibility checks
 
-- [ ] Start a pinned Floci image through Docker Compose.
-- [ ] Configure AWS CLI against `http://localhost:4566`.
-- [ ] Configure the JavaScript AWS SDK against Floci.
-- [ ] Configure boto3 against Floci.
-- [ ] Configure Terraform against Floci.
-- [ ] Create and use an SQS standard queue.
-- [ ] Verify SQS visibility timeout behaviour.
+- [x] Start a pinned Floci image through Docker Compose.
+- [x] Configure AWS CLI against the local Floci endpoint.
+- [x] Configure the JavaScript AWS SDK against Floci.
+- [x] Configure boto3 against Floci.
+- [x] Configure Terraform against Floci.
+- [x] Create and use an SQS standard queue.
+- [x] Verify SQS visibility timeout behaviour.
 - [-] Dead-letter queue and redrive behaviour — deferred to a later incident.
 - [-] Lambda invocation — deferred because `inc-001` uses a continuously running worker.
-- [ ] Create a DynamoDB table.
-- [ ] Verify DynamoDB conditional writes.
+- [x] Create a DynamoDB table.
+- [x] Verify DynamoDB conditional writes.
 - [-] CloudWatch logs — deferred because `inc-001` uses Loki.
 - [-] CloudWatch metrics and alarms — deferred because `inc-001` uses Prometheus.
-- [ ] Verify persistence and clean reset behaviour.
-- [ ] Determine which selected features require Docker socket access.
-- [ ] Test on both ARM64 and AMD64 where possible.
+- [x] Verify in-memory lifecycle and clean reset behaviour.
+- [x] Determine which selected features require Docker socket access; none do.
+- [x] Test the spike on ARM64.
+- [-] Test on AMD64 — deferred to later CI and platform-hardening work.
 
 ### Safety checks
 
-- [ ] Use obviously fake AWS credentials.
-- [ ] Add a guard that rejects non-local AWS endpoints.
-- [ ] Confirm the spike makes no calls to real AWS.
-- [ ] Bind Floci to localhost only.
-- [ ] Document any Docker socket requirement and its risk.
+- [x] Use obviously fake AWS credentials.
+- [x] Add a JavaScript SDK guard that rejects non-local AWS endpoints and credentials.
+- [-] Add and verify network-level egress isolation — deferred until runtime dependencies are packaged without startup registry access.
+- [x] Bind Floci to localhost only.
+- [x] Document that the selected features require no Docker socket access.
 
 ### Deliverables
 
-- [ ] `spikes/floci-compatibility/compose.yaml`
-- [ ] `spikes/floci-compatibility/terraform/`
-- [ ] `spikes/floci-compatibility/tests/`
-- [ ] Floci compatibility matrix
-- [ ] Recorded go/no-go decision
+- [x] `spikes/floci-compatibility/compose.yaml`
+- [x] `spikes/floci-compatibility/terraform/`
+- [x] `spikes/floci-compatibility/sdk-js/check.mjs`
+- [-] Automated cross-platform compatibility suite — deferred to later CI work.
+- [x] Floci compatibility matrix
+- [x] Recorded go/no-go decision
 
 ### Exit criteria
 
-- [ ] Every operation needed by `inc-001` works predictably.
-- [ ] Startup and reset succeed repeatedly.
-- [ ] No real AWS account is required.
-- [ ] A fallback is documented for every required unsupported behaviour.
+- [x] Every operation needed by `inc-001` works predictably.
+- [x] Startup and reset succeed predictably in the tested lifecycle.
+- [x] No real AWS account is required.
+- [x] No required `inc-001` behaviour is unsupported; later-incident services are explicitly deferred.
 
 ---
 
@@ -592,9 +594,9 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 1 — Floci feasibility spike
+**Active phase:** Phase 1 closure
 
-**Next action:** Create and push the Phase 0 benchmark commit, then begin the Floci spike one file at a time.
+**Next action:** Merge the Phase 1 pull request, create the Phase 2 GitHub issue and branch, then build the repository and runtime foundation one file at a time.
 
 ## Open decisions
 
@@ -618,6 +620,8 @@ Potential technologies and failure domains:
 | 2026-10-15 | Use a continuously running worker in `inc-001` | Reduce MVP dependence on Docker-socket-backed Lambda execution |
 | 2026-10-15 | Containerize learner tooling beyond Docker, Make, Git, and curl | Preserve the one-command local experience |
 | 2026-10-15 | Use an honour-system investigation boundary in the MVP | A fully local public repository cannot genuinely hide source and grader logic |
+| 2026-10-16 | Proceed with Floci `2.3.0` for `inc-001` | Required SQS, DynamoDB, SDK, Terraform, and reset behaviour passed the compatibility spike |
+| 2026-10-16 | Defer AMD64 and network-level egress validation | These are later CI and packaging concerns and should not delay the first product vertical slice |
 
 ## Changelog
 
@@ -634,3 +638,5 @@ Potential technologies and failure domains:
 - Defined deterministic behavioural assessment separately from optional written-rubric review.
 - Clarified deterministic incident activation, safe mitigation ordering, and non-destructive reset requirements.
 - Completed the Phase 0 exit criteria and prepared the benchmark commit.
+- Completed the Floci feasibility spike on ARM64 and recorded a conditional go decision.
+- Deferred AMD64 validation, network-level isolation, and automated cross-platform compatibility checks to later CI and packaging work.
