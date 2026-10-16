@@ -21,3 +21,19 @@ jobs:
 
       - name: Validate runtime prerequisites
         run: make doctor
+
+      - name: Start runtime
+        run: make start INCIDENT=ci
+
+      - name: Verify Floci health
+        run: curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4566/_floci/health
+
+      - name: Stop runtime
+        if: always()
+        run: make stop INCIDENT=ci
+
+      - name: Verify cleanup
+        if: always()
+        run: |
+          test -z "$(docker compose -p outagegym-ci -f compose.yaml ps --all --quiet)"
+          ! docker network inspect outagegym-ci_lab >/dev/null 2>&1
