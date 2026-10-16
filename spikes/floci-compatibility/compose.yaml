@@ -46,3 +46,22 @@ services:
     depends_on:
       floci:
         condition: service_healthy
+
+  terraform:
+    image: hashicorp/terraform:1.16.6
+    profiles:
+      - tools
+    working_dir: /workspace
+    volumes:
+      - ./terraform:/workspace
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: outagegym-local
+      AWS_SECRET_ACCESS_KEY: outagegym-local-only
+      AWS_EC2_METADATA_DISABLED: "true"
+      CHECKPOINT_DISABLE: "1"
+      TF_IN_AUTOMATION: "true"
+    depends_on:
+      floci:
+        condition: service_healthy
