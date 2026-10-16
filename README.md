@@ -40,7 +40,7 @@ The local runtime will use Docker Compose, Floci, Terraform, TypeScript services
 
 ## Project status
 
-Phase 2—repository and runtime foundation—is in progress. See the [roadmap](ROADMAP.md) for verified progress.
+Phase 2—repository and runtime foundation—is complete. See the [roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
 
