@@ -6,18 +6,19 @@
 
 OutageGym is a local incident-response practice platform for backend engineers. It presents production-like symptoms and operational evidence without revealing the diagnosis.
 
-## Planned workflow
+## Local workflow
 
-The target learner workflow is:
+Check the local prerequisites and start the current incident:
 
 ```bash
 make doctor
 make start INCIDENT=inc-001
-make grade INCIDENT=inc-001
+make status INCIDENT=inc-001
 make reset INCIDENT=inc-001
+make stop INCIDENT=inc-001
 ```
 
-These commands are not implemented yet.
+Automated grading is planned for a later phase.
 
 ## MVP
 
