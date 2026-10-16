@@ -251,47 +251,47 @@ make stop
 
 - [x] Initialize the Git repository.
 - [x] Configure the GitHub `origin` remote.
-- [ ] Add license.
-- [ ] Add `.gitignore` and `.dockerignore` files.
-- [ ] Add initial README.
-- [ ] Establish formatting and linting conventions.
-- [ ] Add contribution guidelines.
+- [x] Add license.
+- [x] Add `.gitignore` and `.dockerignore` files.
+- [x] Add initial README.
+- [x] Establish formatting and linting conventions.
+- [x] Add contribution guidelines.
 
 ### Runtime
 
-- [ ] Create the base `compose.yaml`.
-- [ ] Define isolated Docker networks.
-- [ ] Add the pinned Floci service.
-- [ ] Add container health checks.
-- [ ] Add named and scenario-scoped volumes.
-- [ ] Add CPU and memory limits where portable.
-- [ ] Bind public ports to `127.0.0.1`.
-- [ ] Add generated local environment configuration.
-- [ ] Add deterministic teardown and volume cleanup.
+- [x] Create the base `compose.yaml`.
+- [x] Define isolated Docker networks.
+- [x] Add the pinned Floci service.
+- [x] Add container health checks.
+- [-] Add named and scenario-scoped volumes — deferred until the baseline introduces persistent services.
+- [-] Add CPU and memory limits where portable — deferred until the complete MVP service set can be profiled.
+- [x] Bind public ports to `127.0.0.1`.
+- [-] Add generated local environment configuration — deferred until scenarios require generated values.
+- [x] Add deterministic teardown and volume cleanup.
 
 ### Commands
 
-- [ ] Implement `make doctor`.
-- [ ] Implement `make start`.
-- [ ] Implement `make status`.
-- [ ] Implement `make stop`.
-- [ ] Implement `make reset`.
-- [ ] Make commands fail with actionable error messages.
+- [x] Implement `make doctor`.
+- [x] Implement `make start`.
+- [x] Implement `make status`.
+- [x] Implement `make stop`.
+- [x] Implement `make reset`.
+- [x] Make commands fail with actionable error messages.
 
 ### CI
 
-- [ ] Add GitHub Actions workflow.
-- [ ] Validate Docker Compose configuration.
-- [ ] Validate Terraform formatting and configuration.
-- [ ] Run a headless startup smoke test.
-- [ ] Verify cleanup after CI execution.
+- [x] Add GitHub Actions workflow.
+- [x] Validate Docker Compose configuration.
+- [-] Validate Terraform formatting and configuration — deferred until production Terraform configuration exists.
+- [x] Run a headless startup smoke test.
+- [x] Verify cleanup after CI execution.
 
 ### Exit criteria
 
-- [ ] A fresh clone starts with one documented command.
-- [ ] Reset produces identical infrastructure and data.
-- [ ] Stop leaves no unexpected running resources.
-- [ ] CI passes without real AWS credentials.
+- [x] A fresh clone starts with one documented command.
+- [x] Reset produces identical infrastructure and data.
+- [x] Stop leaves no unexpected running resources.
+- [x] CI passes without real AWS credentials.
 
 ---
 
@@ -594,14 +594,14 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 1 closure
+**Active phase:** Phase 2 closure
 
-**Next action:** Merge the Phase 1 pull request, create the Phase 2 GitHub issue and branch, then build the repository and runtime foundation one file at a time.
+**Next action:** Review and merge the Phase 2 pull request, then define the first small Phase 3 application-baseline slice.
 
 ## Open decisions
 
 - [x] Use `OutageGym` as the final repository name.
-- [ ] Select the repository license.
+- [x] Use the Apache License 2.0 for the repository.
 - [x] Use a continuously running worker for `inc-001`; test Lambda for later incidents.
 - [x] Include source locally but require evidence-first diagnosis before source inspection under the MVP honour system.
 - [x] Use deterministic postmortem structure checks in the MVP; keep qualitative or AI-assisted review optional and clearly labelled.
@@ -622,6 +622,8 @@ Potential technologies and failure domains:
 | 2026-10-15 | Use an honour-system investigation boundary in the MVP | A fully local public repository cannot genuinely hide source and grader logic |
 | 2026-10-16 | Proceed with Floci `2.3.0` for `inc-001` | Required SQS, DynamoDB, SDK, Terraform, and reset behaviour passed the compatibility spike |
 | 2026-10-16 | Defer AMD64 and network-level egress validation | These are later CI and packaging concerns and should not delay the first product vertical slice |
+| 2026-10-16 | Use the Apache License 2.0 | Preserve broad reuse while retaining notice and patent protections |
+| 2026-10-16 | Scope Compose resources by incident | Keep container, network, and future volume names deterministic and isolated |
 
 ## Changelog
 
@@ -640,3 +642,6 @@ Potential technologies and failure domains:
 - Completed the Phase 0 exit criteria and prepared the benchmark commit.
 - Completed the Floci feasibility spike on ARM64 and recorded a conditional go decision.
 - Deferred AMD64 validation, network-level isolation, and automated cross-platform compatibility checks to later CI and packaging work.
+- Added the repository foundation, pinned Floci runtime, incident-scoped lifecycle commands, and concise local workflow documentation.
+- Added CI validation for Compose configuration, headless startup, Floci health, teardown, and cleanup.
+- Verified that reset removes temporary SQS state and recreates a healthy runtime.
