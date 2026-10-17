@@ -15,9 +15,10 @@ doctor:
 	@echo "OutageGym prerequisites are ready."
 
 start: doctor
-	@$(COMPOSE) up -d --wait || { echo "Error: OutageGym failed to start."; exit 1; }
+	@$(COMPOSE) up -d --wait floci || { echo "Error: Floci failed to start."; exit 1; }
 	@$(TERRAFORM) init -input=false -no-color || { echo "Error: Terraform initialization failed."; exit 1; }
 	@$(TERRAFORM) apply -input=false -auto-approve -no-color || { echo "Error: Infrastructure provisioning failed."; exit 1; }
+	@$(COMPOSE) up -d --wait || { echo "Error: OutageGym application services failed to start."; exit 1; }
 	@echo "OutageGym is running."
 
 status: doctor
@@ -29,7 +30,8 @@ stop: doctor
 
 reset: doctor
 	@$(COMPOSE) down --volumes --remove-orphans || { echo "Error: OutageGym cleanup failed."; exit 1; }
-	@$(COMPOSE) up -d --wait || { echo "Error: OutageGym failed to restart after cleanup."; exit 1; }
+	@$(COMPOSE) up -d --wait floci || { echo "Error: Floci failed to restart after cleanup."; exit 1; }
 	@$(TERRAFORM) init -input=false -no-color || { echo "Error: Terraform initialization failed."; exit 1; }
 	@$(TERRAFORM) apply -input=false -auto-approve -no-color || { echo "Error: Infrastructure provisioning failed."; exit 1; }
+	@$(COMPOSE) up -d --wait || { echo "Error: OutageGym application services failed to restart."; exit 1; }
 	@echo "OutageGym was reset and is running."

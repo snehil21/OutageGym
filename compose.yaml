@@ -41,6 +41,24 @@ services:
     networks:
       - lab
 
+  order-worker:
+    build:
+      context: .
+      dockerfile: services/order-worker/Dockerfile
+    image: outagegym/order-worker:local
+    environment:
+      AWS_ENDPOINT_URL: http://floci:4566
+      AWS_REGION: us-east-1
+      ORDER_QUEUE_URL: http://floci:4566/000000000000/outagegym-inc-001-orders
+      ORDERS_TABLE_NAME: outagegym-inc-001-orders
+      SQS_WAIT_TIME_SECONDS: "10"
+    depends_on:
+      floci:
+        condition: service_healthy
+    stop_grace_period: 15s
+    networks:
+      - lab
+
   aws:
     image: floci/floci:2.3.0-compat
     profiles:
