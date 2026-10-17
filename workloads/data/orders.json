@@ -1,0 +1,12 @@
+[
+  { "productId": "product-baseline-001", "quantity": 1 },
+  { "productId": "product-baseline-002", "quantity": 2 },
+  { "productId": "product-baseline-003", "quantity": 3 },
+  { "productId": "product-baseline-004", "quantity": 4 },
+  { "productId": "product-baseline-005", "quantity": 5 },
+  { "productId": "product-baseline-006", "quantity": 1 },
+  { "productId": "product-baseline-007", "quantity": 2 },
+  { "productId": "product-baseline-008", "quantity": 3 },
+  { "productId": "product-baseline-009", "quantity": 4 },
+  { "productId": "product-baseline-010", "quantity": 5 }
+]

@@ -126,6 +126,21 @@ services:
     networks:
       - lab
 
+  k6:
+    image: grafana/k6:2.3.0
+    profiles:
+      - tools
+    working_dir: /workloads/k6
+    volumes:
+      - ./workloads:/workloads:ro
+    environment:
+      ORDER_API_URL: http://order-api:3000
+    depends_on:
+      order-api:
+        condition: service_healthy
+    networks:
+      - lab
+
 networks:
   lab:
     driver: bridge
