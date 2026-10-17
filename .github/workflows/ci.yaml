@@ -22,6 +22,21 @@ jobs:
       - name: Validate runtime prerequisites
         run: make doctor
 
+      - name: Validate Terraform
+        run: |
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm terraform fmt -check -diff
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            terraform init -input=false -no-color
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            terraform validate -no-color
+
       - name: Start runtime
         run: make start INCIDENT=ci
 
