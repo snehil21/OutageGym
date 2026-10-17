@@ -1,5 +1,11 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { SQSClient } from "@aws-sdk/client-sqs";
+import {
+  DescribeTableCommand,
+  DynamoDBClient,
+} from "@aws-sdk/client-dynamodb";
+import {
+  GetQueueAttributesCommand,
+  SQSClient,
+} from "@aws-sdk/client-sqs";
 
 import type { WorkerConfig } from "./config.js";
 
@@ -32,4 +38,28 @@ export const createAwsClients = (config: AwsConfig): AwsClients => {
       dynamodb.destroy();
     },
   };
+};
+
+export const checkAwsResourcesReady = async (
+  clients: AwsClients,
+  queueUrl: string,
+  tableName: string,
+): Promise<void> => {
+  const [, table] = await Promise.all([
+    clients.sqs.send(
+      new GetQueueAttributesCommand({
+        QueueUrl: queueUrl,
+        AttributeNames: ["QueueArn"],
+      }),
+    ),
+    clients.dynamodb.send(
+      new DescribeTableCommand({
+        TableName: tableName,
+      }),
+    ),
+  ]);
+
+  if (table.Table?.TableStatus !== "ACTIVE") {
+    throw new Error(`Order records table is not active: ${table.Table?.TableStatus}`);
+  }
 };

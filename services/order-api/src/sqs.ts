@@ -1,4 +1,7 @@
-import { SQSClient } from "@aws-sdk/client-sqs";
+import {
+  GetQueueAttributesCommand,
+  SQSClient,
+} from "@aws-sdk/client-sqs";
 
 import type { AppConfig } from "./config.js";
 
@@ -13,3 +16,15 @@ export const createSqsClient = (config: SqsConfig): SQSClient =>
       secretAccessKey: "outagegym-local-only",
     },
   });
+
+export const checkQueueReady = async (
+  sqs: SQSClient,
+  queueUrl: string,
+): Promise<void> => {
+  await sqs.send(
+    new GetQueueAttributesCommand({
+      QueueUrl: queueUrl,
+      AttributeNames: ["QueueArn"],
+    }),
+  );
+};

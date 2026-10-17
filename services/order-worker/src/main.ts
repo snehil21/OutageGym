@@ -1,5 +1,6 @@
-import { createAwsClients } from "./aws.js";
+import { checkAwsResourcesReady, createAwsClients } from "./aws.js";
 import { loadConfig } from "./config.js";
+import { startHealthServer } from "./health-server.js";
 import { processOrderMessage } from "./message-processor.js";
 import { completeOrder } from "./order-repository.js";
 import { consumeNextMessage } from "./queue-consumer.js";
@@ -39,6 +40,16 @@ const pause = async (milliseconds: number): Promise<void> =>
 const runWorker = async (): Promise<void> => {
   const config = loadConfig();
   const clients = createAwsClients(config);
+  const healthServer = await startHealthServer({
+    host: config.healthHost,
+    port: config.healthPort,
+    checkReady: () =>
+      checkAwsResourcesReady(
+        clients,
+        config.orderProcessingQueueUrl,
+        config.orderRecordsTableName,
+      ),
+  });
   const abortController = new AbortController();
   let stopping = false;
 
@@ -99,6 +110,7 @@ const runWorker = async (): Promise<void> => {
   } finally {
     process.off("SIGINT", onSigint);
     process.off("SIGTERM", onSigterm);
+    await healthServer.close();
     clients.destroy();
     log("info", "worker_stopped");
   }

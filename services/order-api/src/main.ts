@@ -1,11 +1,12 @@
 import { buildApp } from "./app.js";
 import { loadConfig } from "./config.js";
 import { publishOrder } from "./order-publisher.js";
-import { createSqsClient } from "./sqs.js";
+import { checkQueueReady, createSqsClient } from "./sqs.js";
 
 const config = loadConfig();
 const sqs = createSqsClient(config);
 const app = buildApp({
+  checkReady: () => checkQueueReady(sqs, config.orderProcessingQueueUrl),
   publishOrder: (message) =>
     publishOrder(sqs, config.orderProcessingQueueUrl, message),
 });

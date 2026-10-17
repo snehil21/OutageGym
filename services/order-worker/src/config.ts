@@ -1,6 +1,8 @@
 export interface WorkerConfig {
   awsEndpointUrl: string;
   awsRegion: string;
+  healthHost: string;
+  healthPort: number;
   orderProcessingQueueUrl: string;
   orderRecordsTableName: string;
   receiveWaitTimeSeconds: number;
@@ -61,6 +63,8 @@ export const loadConfig = (
 ): WorkerConfig => ({
   awsEndpointUrl: readLocalAwsUrl(env, "AWS_ENDPOINT_URL"),
   awsRegion: env.AWS_REGION ?? "us-east-1",
+  healthHost: env.HEALTH_HOST ?? "0.0.0.0",
+  healthPort: readInteger(env, "HEALTH_PORT", 3_001, 1, 65_535),
   orderProcessingQueueUrl: readLocalAwsUrl(
     env,
     "ORDER_PROCESSING_QUEUE_URL",

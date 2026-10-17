@@ -33,7 +33,7 @@ services:
         - CMD
         - node
         - -e
-        - fetch('http://127.0.0.1:3000/health').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+        - fetch('http://127.0.0.1:3000/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
       interval: 5s
       timeout: 3s
       retries: 5
@@ -49,6 +49,8 @@ services:
     environment:
       AWS_ENDPOINT_URL: http://floci:4566
       AWS_REGION: us-east-1
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: "3001"
       ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
       ORDER_RECORDS_TABLE_NAME: outagegym-${INCIDENT_ID:-inc-001}-order-records
       SQS_RECEIVE_WAIT_TIME_SECONDS: "10"
@@ -56,6 +58,16 @@ services:
       floci:
         condition: service_healthy
     stop_grace_period: 15s
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3001/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     networks:
       - lab
 
