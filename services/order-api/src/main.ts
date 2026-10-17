@@ -6,7 +6,8 @@ import { createSqsClient } from "./sqs.js";
 const config = loadConfig();
 const sqs = createSqsClient(config);
 const app = buildApp({
-  publishOrder: (message) => publishOrder(sqs, config.orderQueueUrl, message),
+  publishOrder: (message) =>
+    publishOrder(sqs, config.orderProcessingQueueUrl, message),
 });
 
 const shutdown = async (signal: NodeJS.Signals): Promise<void> => {

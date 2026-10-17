@@ -1,5 +1,5 @@
-resource "aws_dynamodb_table" "orders" {
-  name         = "outagegym-inc-001-orders"
+resource "aws_dynamodb_table" "order_records" {
+  name         = "outagegym-${var.incident_id}-order-records"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "orderId"
   range_key    = "recordId"

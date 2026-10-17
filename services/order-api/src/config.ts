@@ -3,7 +3,7 @@ export interface AppConfig {
   port: number;
   awsEndpointUrl: string;
   awsRegion: string;
-  orderQueueUrl: string;
+  orderProcessingQueueUrl: string;
 }
 
 const localAwsHosts = new Set(["floci", "localhost", "127.0.0.1"]);
@@ -55,5 +55,8 @@ export const loadConfig = (env: NodeJS.ProcessEnv = process.env): AppConfig => (
   port: readPort(env),
   awsEndpointUrl: readLocalAwsUrl(env, "AWS_ENDPOINT_URL"),
   awsRegion: env.AWS_REGION ?? "us-east-1",
-  orderQueueUrl: readLocalAwsUrl(env, "ORDER_QUEUE_URL"),
+  orderProcessingQueueUrl: readLocalAwsUrl(
+    env,
+    "ORDER_PROCESSING_QUEUE_URL",
+  ),
 });

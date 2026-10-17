@@ -59,8 +59,8 @@ const runWorker = async (): Promise<void> => {
   process.once("SIGTERM", onSigterm);
 
   log("info", "worker_started", {
-    queueUrl: config.orderQueueUrl,
-    tableName: config.ordersTableName,
+    queueUrl: config.orderProcessingQueueUrl,
+    tableName: config.orderRecordsTableName,
   });
 
   try {
@@ -68,14 +68,14 @@ const runWorker = async (): Promise<void> => {
       try {
         const result = await consumeNextMessage(
           clients.sqs,
-          config.orderQueueUrl,
+          config.orderProcessingQueueUrl,
           config.receiveWaitTimeSeconds,
           (body) =>
             processOrderMessage(body, {
               completeOrder: (message, completedAt) =>
                 completeOrder(
                   clients.dynamodb,
-                  config.ordersTableName,
+                  config.orderRecordsTableName,
                   message,
                   completedAt,
                 ),

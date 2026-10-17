@@ -1,8 +1,8 @@
 export interface WorkerConfig {
   awsEndpointUrl: string;
   awsRegion: string;
-  orderQueueUrl: string;
-  ordersTableName: string;
+  orderProcessingQueueUrl: string;
+  orderRecordsTableName: string;
   receiveWaitTimeSeconds: number;
 }
 
@@ -61,11 +61,14 @@ export const loadConfig = (
 ): WorkerConfig => ({
   awsEndpointUrl: readLocalAwsUrl(env, "AWS_ENDPOINT_URL"),
   awsRegion: env.AWS_REGION ?? "us-east-1",
-  orderQueueUrl: readLocalAwsUrl(env, "ORDER_QUEUE_URL"),
-  ordersTableName: readRequired(env, "ORDERS_TABLE_NAME"),
+  orderProcessingQueueUrl: readLocalAwsUrl(
+    env,
+    "ORDER_PROCESSING_QUEUE_URL",
+  ),
+  orderRecordsTableName: readRequired(env, "ORDER_RECORDS_TABLE_NAME"),
   receiveWaitTimeSeconds: readInteger(
     env,
-    "SQS_WAIT_TIME_SECONDS",
+    "SQS_RECEIVE_WAIT_TIME_SECONDS",
     10,
     0,
     20,
