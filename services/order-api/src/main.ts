@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import { buildApp } from "./app.js";
 
 const host = process.env.HOST ?? "0.0.0.0";
 const port = Number(process.env.PORT ?? "3000");
@@ -7,9 +7,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535) {
   throw new Error(`Invalid PORT: ${process.env.PORT}`);
 }
 
-const app = Fastify({ logger: true });
-
-app.get("/health", async () => ({ status: "ok" }));
+const app = buildApp();
 
 const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
   app.log.info({ signal }, "Shutdown requested");
