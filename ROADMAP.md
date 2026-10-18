@@ -307,28 +307,28 @@ Client -> Order API -> SQS order queue -> Order worker -> DynamoDB
 
 ### Tasks
 
-- [ ] Build the TypeScript Order API.
-- [ ] Build the TypeScript Order Worker.
-- [ ] Implement AWS SDK endpoint configuration.
-- [ ] Implement SQS publishing and consumption.
-- [ ] Implement DynamoDB order persistence.
-- [ ] Implement idempotent order processing.
-- [ ] Add correlation IDs.
-- [ ] Add structured JSON logs.
-- [ ] Add health and readiness endpoints.
-- [ ] Add graceful shutdown.
-- [ ] Build versioned Docker images.
-- [ ] Add deterministic seed data.
-- [ ] Add a k6 baseline workload.
-- [ ] Add end-to-end happy-path tests.
+- [x] Build the TypeScript Order API.
+- [x] Build the TypeScript Order Worker.
+- [x] Implement AWS SDK endpoint configuration.
+- [x] Implement SQS publishing and consumption.
+- [x] Implement DynamoDB order persistence.
+- [x] Implement idempotent order processing.
+- [x] Add correlation IDs.
+- [x] Add structured JSON logs.
+- [x] Add health and readiness endpoints.
+- [x] Add graceful shutdown.
+- [x] Build reproducible local Docker images from pinned base images.
+- [x] Add deterministic seed data.
+- [x] Add a k6 baseline workload.
+- [x] Add end-to-end happy-path tests.
 
 ### Exit criteria
 
-- [ ] Orders consistently reach the expected final state.
-- [ ] Duplicate processing is prevented under retries.
-- [ ] One order can be traced through all services.
-- [ ] The workload produces repeatable results.
-- [ ] Baseline tests pass after repeated resets.
+- [x] Orders consistently reach the expected final state.
+- [x] Duplicate processing is prevented under retries.
+- [x] One order can be traced through all services.
+- [x] The workload produces repeatable results.
+- [x] Baseline tests pass after repeated resets.
 
 ---
 
@@ -594,9 +594,9 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 2 closure
+**Active phase:** Phase 3 closure
 
-**Next action:** Review and merge the Phase 2 pull request, then define the first small Phase 3 application-baseline slice.
+**Next action:** Close Phase 3 tracking, review and merge its pull request, then define the first small Phase 4 observability slice.
 
 ## Open decisions
 
@@ -645,3 +645,10 @@ Potential technologies and failure domains:
 - Added the repository foundation, pinned Floci runtime, incident-scoped lifecycle commands, and concise local workflow documentation.
 - Added CI validation for Compose configuration, headless startup, Floci health, teardown, and cleanup.
 - Verified that reset removes temporary SQS state and recreates a healthy runtime.
+
+### 2026-10-18
+
+- Built the healthy Order API, SQS worker, and DynamoDB persistence baseline.
+- Added incident-scoped resource naming, idempotent processing, correlation IDs, structured logs, readiness checks, and graceful shutdown.
+- Added deterministic k6 traffic and end-to-end happy-path and duplicate-delivery tests.
+- Verified the complete baseline in CI before and after two consecutive resets.
