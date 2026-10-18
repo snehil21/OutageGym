@@ -5,7 +5,7 @@ HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
 
-.PHONY: doctor start status stop reset workload
+.PHONY: doctor start status stop reset workload test-e2e
 
 doctor:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed or not on PATH."; exit 1; }
@@ -36,5 +36,9 @@ reset: doctor
 	@$(COMPOSE) up -d --build --wait || { echo "Error: OutageGym application services failed to restart."; exit 1; }
 	@echo "OutageGym was reset and is running."
 
-workload: doctor
+workload: start
 	@$(COMPOSE) --profile tools run --rm k6 run /workloads/k6/happy-path.js
+
+test-e2e: start
+	@$(COMPOSE) --profile tools run --rm node node tests/e2e/healthy-order-flow.mjs
+	@$(COMPOSE) --profile tools run --rm node node tests/e2e/duplicate-delivery.mjs
