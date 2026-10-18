@@ -40,5 +40,6 @@ workload: start
 	@$(COMPOSE) --profile tools run --rm k6 run /workloads/k6/happy-path.js
 
 test-e2e: start
+	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
 	@$(COMPOSE) --profile tools run --rm node node tests/e2e/healthy-order-flow.mjs
 	@$(COMPOSE) --profile tools run --rm node node tests/e2e/duplicate-delivery.mjs
