@@ -55,6 +55,24 @@ services:
     networks:
       - lab
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    ports:
+      - "127.0.0.1:13133:13133"
+    expose:
+      - "4317"
+      - "4318"
+      - "9464"
+    volumes:
+      - ./observability/opentelemetry/collector.yml:/etc/otelcol-contrib/config.yml:ro
+    command:
+      - --config=/etc/otelcol-contrib/config.yml
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks:
+      - lab
+
   grafana:
     image: grafana/grafana:13.2.2
     ports:
