@@ -1,8 +1,11 @@
 INCIDENT ?= inc-001
 COMPOSE_PROJECT := outagegym-$(INCIDENT)
-COMPOSE := docker compose -p "$(COMPOSE_PROJECT)" -f compose.yaml
+COMPOSE := INCIDENT_ID="$(INCIDENT)" docker compose -p "$(COMPOSE_PROJECT)" -f compose.yaml
+HOST_UID := $(shell id -u)
+HOST_GID := $(shell id -g)
+TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
 
-.PHONY: doctor start status stop reset
+.PHONY: doctor start status stop reset workload test-e2e
 
 doctor:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed or not on PATH."; exit 1; }
@@ -12,7 +15,10 @@ doctor:
 	@echo "OutageGym prerequisites are ready."
 
 start: doctor
-	@$(COMPOSE) up -d --wait || { echo "Error: OutageGym failed to start."; exit 1; }
+	@$(COMPOSE) up -d --wait floci || { echo "Error: Floci failed to start."; exit 1; }
+	@$(TERRAFORM) init -input=false -no-color || { echo "Error: Terraform initialization failed."; exit 1; }
+	@$(TERRAFORM) apply -input=false -auto-approve -no-color || { echo "Error: Infrastructure provisioning failed."; exit 1; }
+	@$(COMPOSE) up -d --build --wait || { echo "Error: OutageGym application services failed to start."; exit 1; }
 	@echo "OutageGym is running."
 
 status: doctor
@@ -24,5 +30,16 @@ stop: doctor
 
 reset: doctor
 	@$(COMPOSE) down --volumes --remove-orphans || { echo "Error: OutageGym cleanup failed."; exit 1; }
-	@$(COMPOSE) up -d --wait || { echo "Error: OutageGym failed to restart after cleanup."; exit 1; }
+	@$(COMPOSE) up -d --wait floci || { echo "Error: Floci failed to restart after cleanup."; exit 1; }
+	@$(TERRAFORM) init -input=false -no-color || { echo "Error: Terraform initialization failed."; exit 1; }
+	@$(TERRAFORM) apply -input=false -auto-approve -no-color || { echo "Error: Infrastructure provisioning failed."; exit 1; }
+	@$(COMPOSE) up -d --build --wait || { echo "Error: OutageGym application services failed to restart."; exit 1; }
 	@echo "OutageGym was reset and is running."
+
+workload: start
+	@$(COMPOSE) --profile tools run --rm k6 run /workloads/k6/happy-path.js
+
+test-e2e: start
+	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
+	@$(COMPOSE) --profile tools run --rm node node tests/e2e/healthy-order-flow.mjs
+	@$(COMPOSE) --profile tools run --rm node node tests/e2e/duplicate-delivery.mjs

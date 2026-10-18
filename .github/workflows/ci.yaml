@@ -11,8 +11,9 @@ permissions:
 
 jobs:
   compose:
-    name: Validate Compose
+    name: Validate healthy baseline
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -22,11 +23,45 @@ jobs:
       - name: Validate runtime prerequisites
         run: make doctor
 
+      - name: Validate Terraform
+        run: |
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm terraform fmt -check -diff
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            terraform init -input=false -no-color
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            terraform validate -no-color
+
       - name: Start runtime
         run: make start INCIDENT=ci
 
-      - name: Verify Floci health
-        run: curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4566/_floci/health
+      - name: Verify service readiness
+        run: |
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:4566/_floci/health
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/ready
+
+      - name: Verify initial healthy baseline
+        run: |
+          make workload INCIDENT=ci
+          make test-e2e INCIDENT=ci
+
+      - name: Verify first reset
+        run: |
+          make reset INCIDENT=ci
+          make workload INCIDENT=ci
+          make test-e2e INCIDENT=ci
+
+      - name: Verify second reset
+        run: |
+          make reset INCIDENT=ci
+          make workload INCIDENT=ci
+          make test-e2e INCIDENT=ci
 
       - name: Stop runtime
         if: always()
