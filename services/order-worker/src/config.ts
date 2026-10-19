@@ -5,10 +5,16 @@ export interface WorkerConfig {
   healthPort: number;
   orderProcessingQueueUrl: string;
   orderRecordsTableName: string;
+  otlpEndpointUrl: string;
   receiveWaitTimeSeconds: number;
 }
 
 const localAwsHosts = new Set(["floci", "localhost", "127.0.0.1"]);
+const localOtelHosts = new Set([
+  "otel-collector",
+  "localhost",
+  "127.0.0.1",
+]);
 
 const readRequired = (env: NodeJS.ProcessEnv, name: string): string => {
   const value = env[name];
@@ -37,7 +43,13 @@ const readInteger = (
   return parsed;
 };
 
-const readLocalAwsUrl = (env: NodeJS.ProcessEnv, name: string): string => {
+const readLocalUrl = (
+  env: NodeJS.ProcessEnv,
+  name: string,
+  allowedHosts: ReadonlySet<string>,
+  expectedPort: string,
+  serviceName: string,
+): string => {
   const value = readRequired(env, name);
   let url: URL;
 
@@ -49,10 +61,12 @@ const readLocalAwsUrl = (env: NodeJS.ProcessEnv, name: string): string => {
 
   if (
     url.protocol !== "http:" ||
-    !localAwsHosts.has(url.hostname) ||
-    url.port !== "4566"
+    !allowedHosts.has(url.hostname) ||
+    url.port !== expectedPort
   ) {
-    throw new Error(`${name} must target the local Floci endpoint on port 4566`);
+    throw new Error(
+      `${name} must target the local ${serviceName} endpoint on port ${expectedPort}`,
+    );
   }
 
   return value;
@@ -61,15 +75,31 @@ const readLocalAwsUrl = (env: NodeJS.ProcessEnv, name: string): string => {
 export const loadConfig = (
   env: NodeJS.ProcessEnv = process.env,
 ): WorkerConfig => ({
-  awsEndpointUrl: readLocalAwsUrl(env, "AWS_ENDPOINT_URL"),
+  awsEndpointUrl: readLocalUrl(
+    env,
+    "AWS_ENDPOINT_URL",
+    localAwsHosts,
+    "4566",
+    "Floci",
+  ),
   awsRegion: env.AWS_REGION ?? "us-east-1",
   healthHost: env.HEALTH_HOST ?? "0.0.0.0",
   healthPort: readInteger(env, "HEALTH_PORT", 3_001, 1, 65_535),
-  orderProcessingQueueUrl: readLocalAwsUrl(
+  orderProcessingQueueUrl: readLocalUrl(
     env,
     "ORDER_PROCESSING_QUEUE_URL",
+    localAwsHosts,
+    "4566",
+    "Floci",
   ),
   orderRecordsTableName: readRequired(env, "ORDER_RECORDS_TABLE_NAME"),
+  otlpEndpointUrl: readLocalUrl(
+    env,
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    localOtelHosts,
+    "4318",
+    "OpenTelemetry Collector",
+  ),
   receiveWaitTimeSeconds: readInteger(
     env,
     "SQS_RECEIVE_WAIT_TIME_SECONDS",
