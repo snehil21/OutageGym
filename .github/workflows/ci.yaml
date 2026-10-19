@@ -20,6 +20,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Verify learner workspace reset
+        run: sh tests/runtime/learner-workspace.sh
+
       - name: Validate runtime prerequisites
         run: make doctor
 

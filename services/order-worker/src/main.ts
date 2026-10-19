@@ -8,7 +8,10 @@ import {
 import { loadConfig } from "./config.js";
 import { startHealthServer } from "./health-server.js";
 import { processOrderMessage } from "./message-processor.js";
-import { completeOrder } from "./order-repository.js";
+import {
+  completeOrder,
+  recordOrderProcessing,
+} from "./order-repository.js";
 import { consumeNextMessage } from "./queue-consumer.js";
 import { createTelemetry } from "./telemetry.js";
 
@@ -164,19 +167,47 @@ const runWorker = async (): Promise<void> => {
           clients.sqs,
           config.orderProcessingQueueUrl,
           config.receiveWaitTimeSeconds,
-          async (body) => {
+          async (body, delivery) => {
             const startedAt = process.hrtime.bigint();
 
             try {
-              const processed = await processOrderMessage(body, {
-                completeOrder: (message, completedAt) =>
+              const processed = await processOrderMessage(body, delivery, {
+                completeOrder: (
+                  message,
+                  completedAt,
+                  currentDelivery,
+                  storageRevision,
+                ) =>
                   completeOrder(
                     clients.dynamodb,
                     config.orderRecordsTableName,
                     message,
                     completedAt,
+                    currentDelivery,
+                    storageRevision,
                   ),
                 now: () => new Date(),
+                processOrder: async (message) => {
+                  const duration =
+                    message.quantity >= config.bulkOrderMinQuantity
+                      ? config.bulkOrderProcessingDurationMs
+                      : config.orderProcessingDurationMs;
+
+                  await pause(duration);
+                },
+                recordOrderProcessing: (
+                  message,
+                  startedAt,
+                  storageRevision,
+                ) =>
+                  recordOrderProcessing(
+                    clients.dynamodb,
+                    config.orderRecordsTableName,
+                    message,
+                    startedAt,
+                    storageRevision,
+                  ),
+                storageRevision: config.orderStorageRevision,
               });
 
               processingDuration.record(

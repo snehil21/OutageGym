@@ -1,10 +1,14 @@
 export interface WorkerConfig {
   awsEndpointUrl: string;
   awsRegion: string;
+  bulkOrderMinQuantity: number;
+  bulkOrderProcessingDurationMs: number;
   healthHost: string;
   healthPort: number;
   orderProcessingQueueUrl: string;
+  orderProcessingDurationMs: number;
   orderRecordsTableName: string;
+  orderStorageRevision: number;
   otlpEndpointUrl: string;
   receiveWaitTimeSeconds: number;
 }
@@ -83,6 +87,20 @@ export const loadConfig = (
     "Floci",
   ),
   awsRegion: env.AWS_REGION ?? "us-east-1",
+  bulkOrderMinQuantity: readInteger(
+    env,
+    "BULK_ORDER_MIN_QUANTITY",
+    100,
+    1,
+    100,
+  ),
+  bulkOrderProcessingDurationMs: readInteger(
+    env,
+    "BULK_ORDER_PROCESSING_DURATION_MS",
+    0,
+    0,
+    600_000,
+  ),
   healthHost: env.HEALTH_HOST ?? "0.0.0.0",
   healthPort: readInteger(env, "HEALTH_PORT", 3_001, 1, 65_535),
   orderProcessingQueueUrl: readLocalUrl(
@@ -92,7 +110,21 @@ export const loadConfig = (
     "4566",
     "Floci",
   ),
+  orderProcessingDurationMs: readInteger(
+    env,
+    "ORDER_PROCESSING_DURATION_MS",
+    0,
+    0,
+    600_000,
+  ),
   orderRecordsTableName: readRequired(env, "ORDER_RECORDS_TABLE_NAME"),
+  orderStorageRevision: readInteger(
+    env,
+    "ORDER_STORAGE_REVISION",
+    2,
+    1,
+    2,
+  ),
   otlpEndpointUrl: readLocalUrl(
     env,
     "OTEL_EXPORTER_OTLP_ENDPOINT",

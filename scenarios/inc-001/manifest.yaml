@@ -1,0 +1,39 @@
+schema_version: 1
+id: inc-001
+title: Orders are not completing reliably
+difficulty: intermediate
+
+documents:
+  brief: brief.md
+  evidence: evidence.md
+  postmortem: postmortem-template.md
+
+system:
+  entrypoint: order-api
+  processing_service: order-worker
+  queue: order-processing
+  store: order-records
+
+commands:
+  start: make start INCIDENT=inc-001
+  status: make status INCIDENT=inc-001
+  workload: make workload INCIDENT=inc-001
+  reset: make reset INCIDENT=inc-001
+  stop: make stop INCIDENT=inc-001
+
+investigation:
+  grafana_url: http://127.0.0.1:3002
+  prometheus_url: http://127.0.0.1:9090
+  loki_url: http://127.0.0.1:3100
+
+initial_signal:
+  type: alert
+  name: OrderCompletionRate
+  condition: below expected threshold
+
+required_outcomes:
+  - valid orders complete within the defined service window
+  - each order produces at most one fulfilment record
+  - queue depth returns to baseline after the workload
+  - recovery survives an order-worker restart
+  - logs and metrics retain order and correlation identifiers

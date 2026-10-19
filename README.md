@@ -21,6 +21,8 @@ make stop INCIDENT=inc-001
 
 Grafana is available at `http://127.0.0.1:3002` while OutageGym is running.
 
+`make reset` archives learner changes under `.outagegym/archives/<incident>/` before restoring the incident baseline.
+
 Automated grading is planned for a later phase.
 
 ## MVP
@@ -43,7 +45,7 @@ The local runtime will use Docker Compose, Floci, Terraform, TypeScript services
 
 ## Project status
 
-Phase 4—the observability foundation—is complete. See the [roadmap](ROADMAP.md) for verified progress.
+Phase 5—the first complete incident—is complete. See the [roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
 
