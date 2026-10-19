@@ -11,8 +11,14 @@ export interface ConsumedMessage extends ProcessedOrder {
   receiveCount: number;
 }
 
+export interface MessageDelivery {
+  messageId: string;
+  receiveCount: number;
+}
+
 export type ProcessMessage = (
   body: string | undefined,
+  delivery: MessageDelivery,
 ) => Promise<ProcessedOrder>;
 
 export const consumeNextMessage = async (
@@ -43,7 +49,11 @@ export const consumeNextMessage = async (
     throw new Error("Received an SQS message without its required identifiers");
   }
 
-  const processed = await processMessage(message.Body);
+  const delivery = {
+    messageId: message.MessageId,
+    receiveCount: Number(message.Attributes?.ApproximateReceiveCount ?? "1"),
+  };
+  const processed = await processMessage(message.Body, delivery);
 
   await sqs.send(
     new DeleteMessageCommand({
@@ -54,7 +64,6 @@ export const consumeNextMessage = async (
 
   return {
     ...processed,
-    messageId: message.MessageId,
-    receiveCount: Number(message.Attributes?.ApproximateReceiveCount ?? "1"),
+    ...delivery,
   };
 };

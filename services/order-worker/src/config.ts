@@ -8,6 +8,7 @@ export interface WorkerConfig {
   orderProcessingQueueUrl: string;
   orderProcessingDurationMs: number;
   orderRecordsTableName: string;
+  orderStorageRevision: number;
   otlpEndpointUrl: string;
   receiveWaitTimeSeconds: number;
 }
@@ -117,6 +118,13 @@ export const loadConfig = (
     600_000,
   ),
   orderRecordsTableName: readRequired(env, "ORDER_RECORDS_TABLE_NAME"),
+  orderStorageRevision: readInteger(
+    env,
+    "ORDER_STORAGE_REVISION",
+    2,
+    1,
+    2,
+  ),
   otlpEndpointUrl: readLocalUrl(
     env,
     "OTEL_EXPORTER_OTLP_ENDPOINT",
