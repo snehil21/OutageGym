@@ -49,16 +49,13 @@ const messageBody = JSON.stringify({
   quantity: 2,
 });
 
-const publishDuplicateMessages = async () => {
-  const commandInput = {
-    QueueUrl: orderProcessingQueueUrl,
-    MessageBody: messageBody,
-  };
-
-  await Promise.all([
-    sqs.send(new SendMessageCommand(commandInput)),
-    sqs.send(new SendMessageCommand(commandInput)),
-  ]);
+const publishMessage = async () => {
+  await sqs.send(
+    new SendMessageCommand({
+      QueueUrl: orderProcessingQueueUrl,
+      MessageBody: messageBody,
+    }),
+  );
 };
 
 const readOrderRecords = async () => {
@@ -93,7 +90,7 @@ const queueIsEmpty = async () => {
   );
 };
 
-const waitForDuplicateProcessing = async () => {
+const waitForSettledOrder = async () => {
   const deadline = Date.now() + timeoutMilliseconds;
 
   while (Date.now() < deadline) {
@@ -102,7 +99,9 @@ const waitForDuplicateProcessing = async () => {
       queueIsEmpty(),
     ]);
 
-    if (records.length === 2 && empty) {
+    const order = records.find((record) => record.recordId?.S === "ORDER");
+
+    if (records.length === 2 && order?.status?.S === "COMPLETED" && empty) {
       return records;
     }
 
@@ -115,13 +114,25 @@ const waitForDuplicateProcessing = async () => {
 };
 
 try {
-  await publishDuplicateMessages();
-  const records = await waitForDuplicateProcessing();
+  await publishMessage();
+  await waitForSettledOrder();
+
+  await publishMessage();
+  await pause(1_000);
+  const records = await waitForSettledOrder();
 
   const recordIds = records.map((record) => record.recordId?.S).sort();
 
   if (recordIds.join(",") !== "FULFILMENT,ORDER") {
     throw new Error(`Unexpected records created: ${recordIds.join(",")}`);
+  }
+
+  const order = records.find((record) => record.recordId?.S === "ORDER");
+
+  if (order?.status?.S !== "COMPLETED") {
+    throw new Error(
+      `Duplicate delivery changed order status to ${order?.status?.S}`,
+    );
   }
 
   console.log(

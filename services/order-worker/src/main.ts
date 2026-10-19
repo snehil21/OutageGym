@@ -195,12 +195,17 @@ const runWorker = async (): Promise<void> => {
 
                   await pause(duration);
                 },
-                recordOrderProcessing: (message, startedAt) =>
+                recordOrderProcessing: (
+                  message,
+                  startedAt,
+                  storageRevision,
+                ) =>
                   recordOrderProcessing(
                     clients.dynamodb,
                     config.orderRecordsTableName,
                     message,
                     startedAt,
+                    storageRevision,
                   ),
                 storageRevision: config.orderStorageRevision,
               });

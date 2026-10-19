@@ -11,7 +11,11 @@ export interface MessageProcessorDependencies {
   ): Promise<OrderCompletionResult>;
   now(): Date;
   processOrder(message: OrderMessage): Promise<void>;
-  recordOrderProcessing(message: OrderMessage, startedAt: string): Promise<void>;
+  recordOrderProcessing(
+    message: OrderMessage,
+    startedAt: string,
+    storageRevision: number,
+  ): Promise<"started" | "duplicate">;
   storageRevision: number;
 }
 
@@ -27,10 +31,20 @@ export const processOrderMessage = async (
   dependencies: MessageProcessorDependencies,
 ): Promise<ProcessedOrder> => {
   const message = parseOrderMessage(body);
-  await dependencies.recordOrderProcessing(
+  const processingResult = await dependencies.recordOrderProcessing(
     message,
     dependencies.now().toISOString(),
+    dependencies.storageRevision,
   );
+
+  if (processingResult === "duplicate") {
+    return {
+      orderId: message.orderId,
+      correlationId: message.correlationId,
+      result: "duplicate",
+    };
+  }
+
   await dependencies.processOrder(message);
   const result = await dependencies.completeOrder(
     message,

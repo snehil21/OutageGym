@@ -28,21 +28,56 @@ set -- \
   "scenarios/$incident/evidence.md" \
   "scenarios/$incident/postmortem-template.md"
 
+write_baseline() {
+  mkdir -p "$state_directory"
+  git rev-parse HEAD >"$baseline_file"
+}
+
 initialize() {
-  if [ -f "$baseline_file" ]; then
+  current_head=$(git rev-parse HEAD)
+
+  if [ ! -f "$baseline_file" ]; then
+    write_baseline
+    echo "Recorded learner workspace baseline for $incident."
     return
   fi
 
-  mkdir -p "$state_directory"
-  git rev-parse HEAD >"$baseline_file"
-  echo "Recorded learner workspace baseline for $incident."
+  baseline=$(sed -n '1p' "$baseline_file")
+
+  if [ "$baseline" = "$current_head" ]; then
+    return
+  fi
+
+  upstream=$(git rev-parse --verify '@{upstream}' 2>/dev/null || true)
+
+  if [ -n "$upstream" ] && [ "$current_head" = "$upstream" ]; then
+    write_baseline
+    echo "Updated learner workspace baseline for $incident."
+    return
+  fi
+
+  if git cat-file -e "$baseline^{commit}" 2>/dev/null && \
+    git diff --quiet "$baseline" "$current_head" -- "$@"; then
+    write_baseline
+    echo "Updated learner workspace baseline for $incident."
+  fi
+}
+
+validate_baseline() {
+  baseline=$(sed -n '1p' "$baseline_file")
+
+  if ! git cat-file -e "$baseline^{commit}" 2>/dev/null; then
+    echo "Error: learner workspace baseline is no longer available." >&2
+    echo "Remove $state_directory after confirming learner work is preserved." >&2
+    exit 1
+  fi
 }
 
 archive_and_restore() {
-  initialize
+  initialize "$@"
+  validate_baseline
 
   baseline=$(sed -n '1p' "$baseline_file")
-  git cat-file -e "$baseline^{commit}"
 
   tracked_changes=false
   untracked_files=$(git ls-files --others --exclude-standard -- "$@")
@@ -82,7 +117,7 @@ archive_and_restore() {
 
 case "$action" in
   initialize)
-    initialize
+    initialize "$@"
     ;;
   reset)
     archive_and_restore "$@"

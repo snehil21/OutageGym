@@ -1,4 +1,5 @@
 import {
+  ConditionalCheckFailedException,
   PutItemCommand,
   TransactWriteItemsCommand,
   TransactionCanceledException,
@@ -9,6 +10,7 @@ import type { OrderMessage } from "./order-message.js";
 import type { MessageDelivery } from "./queue-consumer.js";
 
 export type OrderCompletionResult = "completed" | "duplicate";
+export type OrderProcessingResult = "started" | "duplicate";
 
 const isDuplicateTransaction = (error: unknown): boolean =>
   error instanceof TransactionCanceledException &&
@@ -21,24 +23,47 @@ export const recordOrderProcessing = async (
   tableName: string,
   message: OrderMessage,
   startedAt: string,
-): Promise<void> => {
-  await dynamodb.send(
-    new PutItemCommand({
-      TableName: tableName,
-      Item: {
-        orderId: { S: message.orderId },
-        recordId: { S: "ORDER" },
-        recordType: { S: "ORDER" },
-        status: { S: "PROCESSING" },
-        schemaVersion: { N: String(message.schemaVersion) },
-        correlationId: { S: message.correlationId },
-        acceptedAt: { S: message.acceptedAt },
-        processingStartedAt: { S: startedAt },
-        productId: { S: message.productId },
-        quantity: { N: String(message.quantity) },
-      },
-    }),
-  );
+  storageRevision: number,
+): Promise<OrderProcessingResult> => {
+  try {
+    await dynamodb.send(
+      new PutItemCommand({
+        TableName: tableName,
+        Item: {
+          orderId: { S: message.orderId },
+          recordId: { S: "ORDER" },
+          recordType: { S: "ORDER" },
+          status: { S: "PROCESSING" },
+          schemaVersion: { N: String(message.schemaVersion) },
+          correlationId: { S: message.correlationId },
+          acceptedAt: { S: message.acceptedAt },
+          processingStartedAt: { S: startedAt },
+          productId: { S: message.productId },
+          quantity: { N: String(message.quantity) },
+        },
+        ...(storageRevision === 2
+          ? {
+              ConditionExpression:
+                "attribute_not_exists(orderId) OR #status <> :completed",
+              ExpressionAttributeNames: {
+                "#status": "status",
+              },
+              ExpressionAttributeValues: {
+                ":completed": { S: "COMPLETED" },
+              },
+            }
+          : {}),
+      }),
+    );
+
+    return "started";
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return "duplicate";
+    }
+
+    throw error;
+  }
 };
 
 export const completeOrder = async (
