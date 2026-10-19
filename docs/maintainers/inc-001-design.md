@@ -62,15 +62,25 @@ A complete repair must combine safe message-lifecycle handling, durable idempote
 
 For the MVP, fulfilment is represented by a durable local record so its invariant can be tested without an external service. The repair must not claim exactly-once SQS processing or rely only on increasing visibility timeout. SQS delivery remains at-least-once; idempotency provides an effectively-once business outcome.
 
-## Provisional mandatory invariants
-
-These timing and percentage targets are design hypotheses until validated against the healthy baseline.
+## Mandatory repair invariants
 
 - At least 99% of valid orders complete within 30 seconds under the fixed load.
 - Each valid order produces at most one fulfilment side effect.
 - Queue age and depth return to baseline within 60 seconds after the load window.
 - Repair survives worker restart.
 - Telemetry and correlation remain intact.
+
+## Validated recovery checkpoints
+
+The fixed 41-order workload produced these repeatable checkpoints:
+
+| State | Visibility | Storage revision | Workers | Expected result |
+|---|---:|---:|---:|---|
+| Broken baseline | 2 seconds | 1 | 2 | Backlog, retries, duplicate fulfilments, and both incident alerts |
+| Immediate mitigation | 10 seconds | 1 | 2 | No retries or duplicate fulfilments; backlog still exceeds the alert threshold |
+| Complete repair | 10 seconds | 2 | 5 | One fulfilment per order, no retries, backlog below the alert threshold, and every order completes within 30 seconds |
+
+The complete repair was also verified by restarting every worker and processing a new order without losing idempotency or correlation.
 
 ## Partial-credit expectations
 
