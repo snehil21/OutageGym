@@ -338,29 +338,29 @@ Client -> Order API -> SQS order queue -> Order worker -> DynamoDB
 
 ### Platform
 
-- [ ] Add Prometheus.
-- [ ] Add Loki.
-- [ ] Add Grafana.
-- [ ] Add OpenTelemetry Collector.
-- [ ] Provision Grafana data sources automatically.
-- [ ] Provision initial dashboards automatically.
+- [x] Add Prometheus.
+- [x] Add Loki.
+- [x] Add Grafana.
+- [x] Add OpenTelemetry Collector.
+- [x] Provision Grafana data sources automatically.
+- [x] Provision initial dashboards automatically.
 
 ### Application telemetry
 
-- [ ] Emit request counts and latency.
-- [ ] Emit processing success and failure counts.
-- [ ] Emit retry and duplicate-prevention counts.
-- [ ] Expose queue-related operational metrics.
-- [ ] Propagate correlation IDs through messages.
-- [ ] Include correlation IDs in logs.
-- [ ] Define useful alerts that do not reveal root causes.
+- [x] Emit request counts and latency.
+- [x] Emit processing success and failure counts.
+- [x] Emit retry and duplicate-prevention counts.
+- [x] Expose queue-related operational metrics.
+- [x] Propagate correlation IDs through messages.
+- [x] Include correlation IDs in logs.
+- [x] Define useful alerts that do not reveal root causes.
 
 ### Exit criteria
 
-- [ ] Every expected diagnosis has observable evidence.
-- [ ] Dashboards do not directly reveal the cause.
-- [ ] A learner can reconstruct the incident timeline.
-- [ ] A single order can be followed across services.
+- [x] Every expected diagnosis has observable evidence.
+- [x] Dashboards do not directly reveal the cause.
+- [x] A learner can reconstruct the incident timeline.
+- [x] A single order can be followed across services.
 
 ---
 
@@ -594,9 +594,9 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 3 closure
+**Active phase:** Phase 4 closure
 
-**Next action:** Close Phase 3 tracking, review and merge its pull request, then define the first small Phase 4 observability slice.
+**Next action:** Run the final Phase 4 verification, review and merge its pull request, then define the first deterministic `inc-001` fault slice.
 
 ## Open decisions
 
@@ -652,3 +652,10 @@ Potential technologies and failure domains:
 - Added incident-scoped resource naming, idempotent processing, correlation IDs, structured logs, readiness checks, and graceful shutdown.
 - Added deterministic k6 traffic and end-to-end happy-path and duplicate-delivery tests.
 - Verified the complete baseline in CI before and after two consecutive resets.
+
+### 2026-10-19
+
+- Added Prometheus, Loki, Grafana, and the OpenTelemetry Collector with pinned images and automatic provisioning.
+- Instrumented the Order API and worker with request, processing, retry, duplicate-prevention, failure, and queue metrics.
+- Added correlation-searchable application logs, a non-spoiler order-processing dashboard, and symptom-based alerts.
+- Added repeatable verification for dashboards, alert health, metrics, and cross-service correlation.

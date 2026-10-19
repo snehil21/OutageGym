@@ -17,6 +17,12 @@ export interface AwsClients {
 
 type AwsConfig = Pick<WorkerConfig, "awsEndpointUrl" | "awsRegion">;
 
+export interface QueueDepth {
+  available: number;
+  delayed: number;
+  inFlight: number;
+}
+
 export const createAwsClients = (config: AwsConfig): AwsClients => {
   const clientConfig = {
     endpoint: config.awsEndpointUrl,
@@ -62,4 +68,30 @@ export const checkAwsResourcesReady = async (
   if (table.Table?.TableStatus !== "ACTIVE") {
     throw new Error(`Order records table is not active: ${table.Table?.TableStatus}`);
   }
+};
+
+export const readQueueDepth = async (
+  sqs: SQSClient,
+  queueUrl: string,
+): Promise<QueueDepth> => {
+  const response = await sqs.send(
+    new GetQueueAttributesCommand({
+      QueueUrl: queueUrl,
+      AttributeNames: [
+        "ApproximateNumberOfMessages",
+        "ApproximateNumberOfMessagesDelayed",
+        "ApproximateNumberOfMessagesNotVisible",
+      ],
+    }),
+  );
+
+  return {
+    available: Number(response.Attributes?.ApproximateNumberOfMessages ?? "0"),
+    delayed: Number(
+      response.Attributes?.ApproximateNumberOfMessagesDelayed ?? "0",
+    ),
+    inFlight: Number(
+      response.Attributes?.ApproximateNumberOfMessagesNotVisible ?? "0",
+    ),
+  };
 };

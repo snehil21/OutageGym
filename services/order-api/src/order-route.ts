@@ -10,6 +10,11 @@ import type {
 
 export interface OrderRouteDependencies {
   publishOrder(message: OrderMessage): Promise<string>;
+  recordOrderAccepted(event: {
+    correlationId: string;
+    messageId: string;
+    orderId: string;
+  }): void;
 }
 
 export const registerOrderRoute = (
@@ -58,6 +63,7 @@ export const registerOrderRoute = (
         { correlationId, messageId, orderId },
         "Order accepted",
       );
+      dependencies.recordOrderAccepted({ correlationId, messageId, orderId });
 
       return reply.code(202).send({
         orderId,

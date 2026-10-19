@@ -5,7 +5,7 @@ HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
 
-.PHONY: doctor start status stop reset workload test-e2e
+.PHONY: doctor start status stop reset workload test-e2e test-observability
 
 doctor:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed or not on PATH."; exit 1; }
@@ -43,3 +43,6 @@ test-e2e: start
 	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
 	@$(COMPOSE) --profile tools run --rm node node tests/e2e/healthy-order-flow.mjs
 	@$(COMPOSE) --profile tools run --rm node node tests/e2e/duplicate-delivery.mjs
+
+test-observability: start
+	@$(COMPOSE) --profile tools run --rm node node tests/observability/foundation.mjs

@@ -12,6 +12,99 @@ services:
     networks:
       - lab
 
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --spider
+        - http://127.0.0.1:9090/-/ready
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - lab
+
+  loki:
+    image: grafana/loki:3.7.8
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
+    command:
+      - -config.file=/etc/loki/loki.yml
+    healthcheck:
+      test:
+        - CMD
+        - /usr/bin/loki
+        - -health
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - lab
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    ports:
+      - "127.0.0.1:13133:13133"
+    expose:
+      - "4317"
+      - "4318"
+      - "9464"
+    volumes:
+      - ./observability/opentelemetry/collector.yml:/etc/otelcol-contrib/config.yml:ro
+    command:
+      - --config=/etc/otelcol-contrib/config.yml
+    depends_on:
+      loki:
+        condition: service_healthy
+    networks:
+      - lab
+
+  grafana:
+    image: grafana/grafana:13.2.2
+    ports:
+      - "127.0.0.1:3002:3000"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_USERS_DEFAULT_THEME: dark
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --spider
+        - http://127.0.0.1:3000/api/health
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - lab
+
   order-api:
     build:
       context: .
@@ -24,6 +117,7 @@ services:
       PORT: "3000"
       AWS_ENDPOINT_URL: http://floci:4566
       AWS_REGION: us-east-1
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
     depends_on:
       floci:
@@ -53,6 +147,7 @@ services:
       HEALTH_PORT: "3001"
       ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
       ORDER_RECORDS_TABLE_NAME: outagegym-${INCIDENT_ID:-inc-001}-order-records
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       SQS_RECEIVE_WAIT_TIME_SECONDS: "10"
     depends_on:
       floci:

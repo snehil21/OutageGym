@@ -14,9 +14,12 @@ Check the local prerequisites and start the current incident:
 make doctor
 make start INCIDENT=inc-001
 make status INCIDENT=inc-001
+make test-observability INCIDENT=inc-001
 make reset INCIDENT=inc-001
 make stop INCIDENT=inc-001
 ```
+
+Grafana is available at `http://127.0.0.1:3002` while OutageGym is running.
 
 Automated grading is planned for a later phase.
 
@@ -40,7 +43,7 @@ The local runtime will use Docker Compose, Floci, Terraform, TypeScript services
 
 ## Project status
 
-Phase 2—repository and runtime foundation—is complete. See the [roadmap](ROADMAP.md) for verified progress.
+Phase 4—the observability foundation—is complete. See the [roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
 
