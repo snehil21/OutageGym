@@ -1,0 +1,48 @@
+groups:
+  - name: outagegym-order-processing
+    rules:
+      - alert: OrderCompletionRatioLow
+        expr: |
+          (
+            sum(rate(outagegym_worker_processing_count_total{result="completed"}[2m]))
+            /
+            clamp_min(
+              sum(rate(outagegym_api_request_count_total{http_route="/orders",http_response_status_code="202"}[2m])),
+              0.001
+            )
+          ) < 0.9
+          and
+          sum(rate(outagegym_api_request_count_total{http_route="/orders",http_response_status_code="202"}[2m])) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Order completion rate is below the expected baseline
+          description: Accepted order traffic is not being matched by successful completions.
+
+      - alert: OrderQueueBacklogHigh
+        expr: max(outagegym_worker_queue_messages{state="available"}) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: The order-processing queue has a sustained backlog
+          description: More than ten order messages have remained available for processing.
+
+      - alert: OrderProcessingFailuresDetected
+        expr: increase(outagegym_worker_processing_failure_count_total[2m]) > 0
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: Order processing failures were detected
+          description: At least one worker processing failure occurred during the last two minutes.
+
+      - alert: OrderRetryVolumeElevated
+        expr: increase(outagegym_worker_retry_count_total[2m]) > 3
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: Order retry volume is elevated
+          description: More than three retry deliveries were processed during the last two minutes.

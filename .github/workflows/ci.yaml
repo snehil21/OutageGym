@@ -51,6 +51,12 @@ jobs:
           make workload INCIDENT=ci
           make test-e2e INCIDENT=ci
 
+      - name: Verify observability foundation
+        run: |
+          docker compose -p outagegym-ci -f compose.yaml \
+            --profile tools run --rm node \
+            node tests/observability/foundation.mjs
+
       - name: Verify first reset
         run: |
           make reset INCIDENT=ci
