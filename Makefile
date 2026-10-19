@@ -3,6 +3,7 @@ COMPOSE_PROJECT := outagegym-$(INCIDENT)
 SCENARIO_ENV := $(wildcard scenarios/$(INCIDENT)/fault-config/runtime.env)
 COMPOSE_ENV := $(if $(SCENARIO_ENV),--env-file "$(SCENARIO_ENV)")
 COMPOSE := INCIDENT_ID="$(INCIDENT)" docker compose $(COMPOSE_ENV) -p "$(COMPOSE_PROJECT)" -f compose.yaml
+WORKLOAD_FILE := $(if $(wildcard workloads/k6/$(INCIDENT).js),$(INCIDENT).js,happy-path.js)
 HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
@@ -39,7 +40,7 @@ reset: doctor
 	@echo "OutageGym was reset and is running."
 
 workload: start
-	@$(COMPOSE) --profile tools run --rm k6 run /workloads/k6/happy-path.js
+	@$(COMPOSE) --profile tools run --rm k6 run /workloads/k6/$(WORKLOAD_FILE)
 
 test-e2e: start
 	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
