@@ -177,6 +177,14 @@ const runWorker = async (): Promise<void> => {
                     completedAt,
                   ),
                 now: () => new Date(),
+                processOrder: async (message) => {
+                  const duration =
+                    message.quantity >= config.bulkOrderMinQuantity
+                      ? config.bulkOrderProcessingDurationMs
+                      : config.orderProcessingDurationMs;
+
+                  await pause(duration);
+                },
               });
 
               processingDuration.record(

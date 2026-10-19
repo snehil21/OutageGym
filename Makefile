@@ -1,6 +1,7 @@
 INCIDENT ?= inc-001
 COMPOSE_PROJECT := outagegym-$(INCIDENT)
-COMPOSE := INCIDENT_ID="$(INCIDENT)" docker compose -p "$(COMPOSE_PROJECT)" -f compose.yaml
+SCENARIO_ENV := scenarios/$(INCIDENT)/fault-config/runtime.env
+COMPOSE := INCIDENT_ID="$(INCIDENT)" docker compose --env-file "$(SCENARIO_ENV)" -p "$(COMPOSE_PROJECT)" -f compose.yaml
 HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform

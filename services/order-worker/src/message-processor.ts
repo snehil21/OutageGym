@@ -7,6 +7,7 @@ export interface MessageProcessorDependencies {
     completedAt: string,
   ): Promise<OrderCompletionResult>;
   now(): Date;
+  processOrder(message: OrderMessage): Promise<void>;
 }
 
 export interface ProcessedOrder {
@@ -20,6 +21,7 @@ export const processOrderMessage = async (
   dependencies: MessageProcessorDependencies,
 ): Promise<ProcessedOrder> => {
   const message = parseOrderMessage(body);
+  await dependencies.processOrder(message);
   const result = await dependencies.completeOrder(
     message,
     dependencies.now().toISOString(),
