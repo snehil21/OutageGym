@@ -7,6 +7,7 @@ WORKLOAD_FILE := $(if $(wildcard workloads/k6/$(INCIDENT).js),$(INCIDENT).js,hap
 HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
+LEARNER_WORKSPACE := ./scripts/learner-workspace.sh
 
 .PHONY: doctor start status stop reset workload test-e2e test-observability test-incident
 
@@ -18,6 +19,7 @@ doctor:
 	@echo "OutageGym prerequisites are ready."
 
 start: doctor
+	@$(LEARNER_WORKSPACE) initialize "$(INCIDENT)"
 	@$(COMPOSE) up -d --wait floci || { echo "Error: Floci failed to start."; exit 1; }
 	@$(TERRAFORM) init -input=false -no-color || { echo "Error: Terraform initialization failed."; exit 1; }
 	@$(TERRAFORM) apply -input=false -auto-approve -no-color || { echo "Error: Infrastructure provisioning failed."; exit 1; }
@@ -32,6 +34,7 @@ stop: doctor
 	@echo "OutageGym is stopped."
 
 reset: doctor
+	@$(LEARNER_WORKSPACE) reset "$(INCIDENT)"
 	@$(COMPOSE) down --volumes --remove-orphans || { echo "Error: OutageGym cleanup failed."; exit 1; }
 	@$(COMPOSE) up -d --wait floci || { echo "Error: Floci failed to restart after cleanup."; exit 1; }
 	@$(TERRAFORM) init -input=false -no-color || { echo "Error: Terraform initialization failed."; exit 1; }

@@ -2,7 +2,7 @@
 
 > A living implementation plan for a local, reproducible incident-response practice platform.
 >
-> Last updated: 2026-10-15
+> Last updated: 2026-10-19
 
 ## How to use this plan
 
@@ -382,18 +382,18 @@ Order completion rate has fallen below its expected threshold.
 
 ### Tasks
 
-- [ ] Define two or three interacting internal faults.
-- [ ] Ensure fault names do not appear in learner-visible material.
-- [ ] Create deterministic fault activation.
-- [ ] Create deterministic incident traffic.
-- [ ] Add realistic initial alerts.
-- [ ] Add evidence for each cause in logs or metrics.
-- [ ] Define at least one immediate mitigation.
-- [ ] Define valid permanent-repair invariants.
-- [ ] Add the learner brief.
-- [ ] Add an evidence worksheet.
-- [ ] Add a postmortem template.
-- [ ] Add reset hooks.
+- [x] Define two or three interacting internal faults.
+- [x] Ensure fault names do not appear in learner-visible material.
+- [x] Create deterministic fault activation.
+- [x] Create deterministic incident traffic.
+- [x] Add realistic initial alerts.
+- [x] Add evidence for each cause in logs or metrics.
+- [x] Define at least one immediate mitigation.
+- [x] Define valid permanent-repair invariants.
+- [x] Add the learner brief.
+- [x] Add an evidence worksheet.
+- [x] Add a postmortem template.
+- [x] Add reset hooks.
 
 ### Proposed structure
 
@@ -410,12 +410,12 @@ scenarios/inc-001/
 
 ### Exit criteria
 
-- [ ] An uninformed tester can reproduce the incident.
-- [ ] The diagnosis is not disclosed by names or configuration comments.
-- [ ] Each planted fault has sufficient evidence.
-- [ ] A partial repair produces measurable partial improvement.
-- [ ] A complete repair restores all required invariants.
-- [ ] Reset restores the defined initial broken state while preserving archived learner work.
+- [x] An uninformed tester can reproduce the incident.
+- [x] The diagnosis is not disclosed by names or configuration comments.
+- [x] Each planted fault has sufficient evidence.
+- [x] A partial repair produces measurable partial improvement.
+- [x] A complete repair restores all required invariants.
+- [x] Reset restores the defined initial broken state while preserving archived learner work.
 
 ---
 
@@ -582,21 +582,21 @@ Potential technologies and failure domains:
 ## Definition of MVP done
 
 - [ ] A fresh clone passes `make doctor` on a supported machine.
-- [ ] `make start INCIDENT=inc-001` launches the complete system.
-- [ ] The initial incident is reproducible.
-- [ ] The learner can investigate using documented tools.
+- [x] `make start INCIDENT=inc-001` launches the complete system.
+- [x] The initial incident is reproducible.
+- [x] The learner can investigate using documented tools.
 - [ ] At least two valid repair approaches are accepted.
 - [ ] `make grade INCIDENT=inc-001` returns a deterministic behavioural result and written-rubric review status.
-- [ ] `make reset INCIDENT=inc-001` restores the defined initial incident while preserving archived learner work.
-- [ ] `make stop` cleans up safely.
+- [x] `make reset INCIDENT=inc-001` restores the defined initial incident while preserving archived learner work.
+- [x] `make stop` cleans up safely.
 - [ ] CI validates startup, behavioural assessment, reset, and cleanup.
 - [ ] Three beta users complete the flow without author intervention.
 
 ## Current focus
 
-**Active phase:** Phase 4 closure
+**Active phase:** Phase 5 closure
 
-**Next action:** Run the final Phase 4 verification, review and merge its pull request, then define the first deterministic `inc-001` fault slice.
+**Next action:** Review and merge the completed `inc-001` incident, then begin Phase 6 behavioural assessment.
 
 ## Open decisions
 
@@ -659,3 +659,6 @@ Potential technologies and failure domains:
 - Instrumented the Order API and worker with request, processing, retry, duplicate-prevention, failure, and queue metrics.
 - Added correlation-searchable application logs, a non-spoiler order-processing dashboard, and symptom-based alerts.
 - Added repeatable verification for dashboards, alert health, metrics, and cross-service correlation.
+- Added deterministic interacting queue-timing, idempotency, and capacity faults for `inc-001`.
+- Added repeatable incident traffic plus broken-state, mitigation, complete-repair, and restart verification.
+- Added reset-time learner-work archiving and restoration of the immutable incident baseline.

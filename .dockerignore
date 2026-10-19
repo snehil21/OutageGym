@@ -29,6 +29,7 @@ crash.*.log
 
 # Runtime logs
 *.log
+.outagegym/
 
 # Editors and operating systems
 .idea/
