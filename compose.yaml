@@ -115,6 +115,7 @@ services:
       PORT: "3000"
       AWS_ENDPOINT_URL: http://floci:4566
       AWS_REGION: us-east-1
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
     depends_on:
       floci:
