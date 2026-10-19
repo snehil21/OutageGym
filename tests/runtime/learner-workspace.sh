@@ -37,6 +37,9 @@ git add .
 git commit --quiet -m "product v1"
 git push --quiet --set-upstream origin main
 
+"$repository_root/scripts/learner-workspace.sh" initialize ci
+"$repository_root/scripts/learner-workspace.sh" reset ci
+
 "$repository_root/scripts/learner-workspace.sh" initialize inc-001
 initial_baseline=$(cat .outagegym/state/inc-001/baseline.commit)
 

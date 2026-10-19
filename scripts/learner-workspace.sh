@@ -23,10 +23,22 @@ set -- \
   package-lock.json \
   infra/terraform \
   services/order-api \
-  services/order-worker \
+  services/order-worker
+
+for candidate in \
   "scenarios/$incident/fault-config" \
   "scenarios/$incident/evidence.md" \
   "scenarios/$incident/postmortem-template.md"
+do
+  baseline=$(sed -n '1p' "$baseline_file" 2>/dev/null || true)
+
+  if [ -e "$candidate" ] || \
+    git cat-file -e "HEAD:$candidate" 2>/dev/null || \
+    { [ -n "$baseline" ] && git cat-file -e "$baseline:$candidate" 2>/dev/null; }
+  then
+    set -- "$@" "$candidate"
+  fi
+done
 
 write_baseline() {
   mkdir -p "$state_directory"
