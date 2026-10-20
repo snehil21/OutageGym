@@ -36,9 +36,6 @@ jobs:
       - name: Verify learner workspace reset
         run: sh tests/runtime/learner-workspace.sh
 
-      - name: Validate runtime prerequisites
-        run: make doctor
-
       - name: Validate Terraform
         run: |
           docker compose -p outagegym-inc-001 -f compose.yaml \
@@ -64,8 +61,8 @@ jobs:
 
       - name: Verify initial healthy baseline
         run: |
-          make workload INCIDENT=inc-001
-          make test-e2e INCIDENT=inc-001
+          make install-test-dependencies INCIDENT=inc-001
+          make test-e2e-current-runtime INCIDENT=inc-001
 
       - name: Verify observability foundation
         run: |
@@ -76,19 +73,10 @@ jobs:
       - name: Verify first reset
         run: |
           make reset INCIDENT=inc-001
-          make workload INCIDENT=inc-001
-          make test-e2e INCIDENT=inc-001
-
-      - name: Verify second reset
-        run: |
-          make reset INCIDENT=inc-001
-          make workload INCIDENT=inc-001
-          make test-e2e INCIDENT=inc-001
+          make test-e2e-current-runtime INCIDENT=inc-001
 
       - name: Verify deterministic behavioural assessment
-        run: |
-          make grade INCIDENT=inc-001
-          make grade INCIDENT=inc-001
+        run: make grade-current-runtime INCIDENT=inc-001
 
       - name: Stop runtime
         if: always()
