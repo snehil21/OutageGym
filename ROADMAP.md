@@ -532,7 +532,7 @@ scenarios/inc-001/
 
 **Goal:** Expand only after the platform and first incident are stable.
 
-- [ ] `inc-002` — missing notifications
+- [x] `inc-002` — missing notifications
 - [ ] `inc-003` — intermittent checkout failures
 - [ ] `inc-004` — delayed file processing
 - [ ] `inc-005` — inconsistent payment status

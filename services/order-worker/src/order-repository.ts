@@ -40,6 +40,7 @@ export const recordOrderProcessing = async (
           processingStartedAt: { S: startedAt },
           productId: { S: message.productId },
           quantity: { N: String(message.quantity) },
+          notificationChannel: { S: message.notificationChannel },
         },
         ...(storageRevision === 2
           ? {
@@ -85,6 +86,7 @@ export const completeOrder = async (
     completedAt: { S: completedAt },
     productId: { S: message.productId },
     quantity: { N: String(message.quantity) },
+    notificationChannel: { S: message.notificationChannel },
   };
 
   if (storageRevision === 2) {

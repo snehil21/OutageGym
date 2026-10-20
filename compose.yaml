@@ -24,6 +24,10 @@ x-outagegym-runtime:
   grafana-health-url: &grafana-health-url http://127.0.0.1:3000/api/health
   order-api-health-command: &order-api-health-command fetch('http://127.0.0.1:3000/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
   order-worker-health-command: &order-worker-health-command fetch('http://127.0.0.1:3001/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+  notification-worker-health-command: &notification-worker-health-command fetch('http://127.0.0.1:3003/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+  order-completion-event-bus-name: &order-completion-event-bus-name outagegym-${INCIDENT_ID:-inc-001}-notification-events
+  notification-queue-url: &notification-queue-url http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-notification-delivery
+  notification-records-table-name: &notification-records-table-name outagegym-${INCIDENT_ID:-inc-001}-notification-records
 
 services:
   floci:
@@ -187,6 +191,7 @@ services:
       ORDER_PROCESSING_DURATION_MS: ${ORDER_PROCESSING_DURATION_MS:-0}
       BULK_ORDER_MIN_QUANTITY: ${BULK_ORDER_MIN_QUANTITY:-100}
       BULK_ORDER_PROCESSING_DURATION_MS: ${BULK_ORDER_PROCESSING_DURATION_MS:-0}
+      ORDER_COMPLETION_EVENT_BUS_NAME: ${ORDER_COMPLETION_EVENT_BUS_NAME:-}
     depends_on:
       floci:
         condition: service_healthy
@@ -199,6 +204,39 @@ services:
         - node
         - -e
         - *order-worker-health-command
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - lab
+
+  notification-worker:
+    build:
+      context: .
+      dockerfile: services/notification-worker/Dockerfile
+    image: outagegym/notification-worker:local
+    profiles:
+      - notifications
+    environment:
+      AWS_ENDPOINT_URL: *aws-endpoint-url
+      AWS_REGION: *aws-region
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: "3003"
+      NOTIFICATION_QUEUE_URL: *notification-queue-url
+      NOTIFICATION_RECORDS_TABLE_NAME: *notification-records-table-name
+      OTEL_EXPORTER_OTLP_ENDPOINT: *otlp-endpoint-url
+      SQS_RECEIVE_WAIT_TIME_SECONDS: "10"
+    depends_on:
+      floci:
+        condition: service_healthy
+    stop_grace_period: 15s
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - *notification-worker-health-command
       interval: 5s
       timeout: 3s
       retries: 5
@@ -265,6 +303,9 @@ services:
       AWS_REGION: *aws-region
       ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
       ORDER_RECORDS_TABLE_NAME: *order-records-table-name
+      ORDER_COMPLETION_EVENT_BUS_NAME: *order-completion-event-bus-name
+      NOTIFICATION_QUEUE_URL: *notification-queue-url
+      NOTIFICATION_RECORDS_TABLE_NAME: *notification-records-table-name
       PROMETHEUS_URL: *prometheus-url
       LOKI_URL: *loki-url
       OTEL_COLLECTOR_HEALTH_URL: *otel-health-url
@@ -313,6 +354,7 @@ services:
     working_dir: /workloads/k6
     volumes:
       - ./workloads:/workloads:ro
+      - ./scenarios:/scenarios:ro
     environment:
       ORDER_API_URL: *order-api-url
       INCIDENT_WORKLOAD_ARRIVAL_RATE: ${INCIDENT_WORKLOAD_ARRIVAL_RATE:-1}

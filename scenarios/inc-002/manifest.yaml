@@ -1,0 +1,62 @@
+schema_version: 1
+id: inc-002
+title: Completed orders are missing customer notifications
+difficulty:
+  level: intermediate
+  interacting_causes: 2
+  evidence_sources:
+    - alerts
+    - configuration
+    - logs
+    - metrics
+    - resource_state
+  repair_tradeoffs: true
+
+resources:
+  minimum_host:
+    logical_cpu_cores: 4
+    memory_gb: 4
+    free_disk_gb: 6
+  required_services:
+    - floci
+    - grafana
+    - loki
+    - notification-worker
+    - order-api
+    - order-worker
+    - otel-collector
+    - prometheus
+
+documents:
+  brief: brief.md
+  evidence: evidence.md
+  postmortem: postmortem-template.md
+
+system:
+  entrypoint: order-api
+  processing_service: notification-worker
+  queue: notification-delivery
+  store: notification-records
+
+commands:
+  start: make start INCIDENT=inc-002
+  status: make status INCIDENT=inc-002
+  workload: make workload INCIDENT=inc-002
+  reset: make reset INCIDENT=inc-002
+  stop: make stop INCIDENT=inc-002
+
+investigation:
+  grafana_url: http://127.0.0.1:3002
+  prometheus_url: http://127.0.0.1:9090
+  loki_url: http://127.0.0.1:3100
+
+initial_signal:
+  type: customer_report
+  name: OrderConfirmationMissing
+  condition: Some completed orders have no customer notification record
+
+required_outcomes:
+  - every eligible completed order produces one notification record
+  - notification delivery recovers without deleting affected orders
+  - recovery survives a notification-worker restart
+  - logs and metrics retain order and correlation identifiers

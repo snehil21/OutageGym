@@ -59,6 +59,13 @@ export const runtimeConfig = Object.freeze({
     "4566",
   ),
   orderRecordsTableName: required("ORDER_RECORDS_TABLE_NAME"),
+  orderCompletionEventBusName: required("ORDER_COMPLETION_EVENT_BUS_NAME"),
+  notificationQueueUrl: localUrl(
+    "NOTIFICATION_QUEUE_URL",
+    new Set(["floci", ...loopbackHosts]),
+    "4566",
+  ),
+  notificationRecordsTableName: required("NOTIFICATION_RECORDS_TABLE_NAME"),
   otelCollectorHealthUrl: localUrl(
     "OTEL_COLLECTOR_HEALTH_URL",
     new Set(["otel-collector", ...loopbackHosts]),

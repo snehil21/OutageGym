@@ -2,6 +2,7 @@ import {
   DescribeTableCommand,
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
+import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
 import {
   GetQueueAttributesCommand,
   SQSClient,
@@ -12,6 +13,7 @@ import type { WorkerConfig } from "./config.js";
 export interface AwsClients {
   sqs: SQSClient;
   dynamodb: DynamoDBClient;
+  eventbridge: EventBridgeClient;
   destroy(): void;
 }
 
@@ -35,13 +37,16 @@ export const createAwsClients = (config: AwsConfig): AwsClients => {
 
   const sqs = new SQSClient(clientConfig);
   const dynamodb = new DynamoDBClient(clientConfig);
+  const eventbridge = new EventBridgeClient(clientConfig);
 
   return {
     sqs,
     dynamodb,
+    eventbridge,
     destroy: () => {
       sqs.destroy();
       dynamodb.destroy();
+      eventbridge.destroy();
     },
   };
 };

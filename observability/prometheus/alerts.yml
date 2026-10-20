@@ -46,3 +46,22 @@ groups:
         annotations:
           summary: Order retry volume is elevated
           description: More than three retry deliveries were processed during the last two minutes.
+
+      - alert: NotificationDeliveryRatioLow
+        expr: |
+          (
+            sum(increase(outagegym_notification_processing_count_total{result="delivered"}[2m]))
+            /
+            clamp_min(
+              sum(increase(outagegym_worker_completion_event_count_total[2m])),
+              1
+            )
+          ) < 0.9
+          and
+          sum(increase(outagegym_worker_completion_event_count_total[2m])) >= 2
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: Completed orders are missing notification deliveries
+          description: Notification records are not keeping pace with completed orders.

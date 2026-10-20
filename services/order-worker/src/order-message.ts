@@ -5,6 +5,7 @@ export interface OrderMessage {
   acceptedAt: string;
   productId: string;
   quantity: number;
+  notificationChannel: "EMAIL" | "SMS";
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -47,6 +48,7 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
   const acceptedAt = readNonEmptyString(value, "acceptedAt");
   const productId = readNonEmptyString(value, "productId");
   const quantity = value.quantity;
+  const notificationChannel = value.notificationChannel ?? "EMAIL";
 
   if (Number.isNaN(Date.parse(acceptedAt))) {
     throw new Error("Order message field acceptedAt must be a valid timestamp");
@@ -65,6 +67,12 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
     throw new Error("Order message field quantity must be an integer from 1 to 100");
   }
 
+  if (notificationChannel !== "EMAIL" && notificationChannel !== "SMS") {
+    throw new Error(
+      "Order message field notificationChannel must be EMAIL or SMS",
+    );
+  }
+
   return {
     schemaVersion: 1,
     orderId: readNonEmptyString(value, "orderId"),
@@ -72,5 +80,6 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
     acceptedAt,
     productId,
     quantity,
+    notificationChannel,
   };
 };
