@@ -1,70 +1,95 @@
 # OutageGym
 
-**Production incidents you can diagnose and fix locally.**
+**Production incidents you can diagnose and repair locally.**
 
-> OutageGym is in early development and is not ready for learners yet.
+OutageGym is a hands-on incident-response practice platform for backend
+engineers. It starts a deliberately unhealthy system, gives you realistic
+operational evidence, and grades the repaired behaviour without prescribing one
+implementation.
 
-OutageGym is a local incident-response practice platform for backend engineers. It presents production-like symptoms and operational evidence without revealing the diagnosis.
+It is intended for backend engineers who already understand terminals, HTTP,
+Docker, and asynchronous processing. The first incident is intermediate and
+requires correlating evidence across multiple services.
 
-## Local workflow
+> Phase 8 public-beta preparation is in progress. The first incident is usable,
+> but cross-platform beta validation is not complete.
 
-Check the local prerequisites and start the current incident:
+## Quick start
 
 ```bash
+git clone https://github.com/snehil21/OutageGym.git
+cd OutageGym
 make doctor
+make list
 make start INCIDENT=inc-001
-make status INCIDENT=inc-001
-make test-observability INCIDENT=inc-001
-make grade INCIDENT=inc-001
-make reset INCIDENT=inc-001
-make stop INCIDENT=inc-001
 ```
 
-List available incidents or create an authoring skeleton with:
+Open Grafana at <http://127.0.0.1:3002>, then read the selected scenario's
+learner brief—for example, the [inc-001 brief](scenarios/inc-001/brief.md)—and
+investigate the system. The default incident is intentionally broken, so an
+initial grading failure is expected.
 
 ```bash
-make list
+make workload INCIDENT=inc-001
+make status INCIDENT=inc-001
+make grade INCIDENT=inc-001
+```
+
+After repairing the incident, rerun `make grade`. When finished, stop the
+runtime or reset it to the original broken state:
+
+```bash
+make stop INCIDENT=inc-001
+# Or restore and restart the incident:
+make reset INCIDENT=inc-001
+```
+
+`make reset` archives learner changes under
+`.outagegym/archives/<incident>/` before restoring the baseline.
+
+## Local endpoints
+
+| Service | Default address |
+|---|---|
+| Order API | <http://127.0.0.1:3000> |
+| Grafana | <http://127.0.0.1:3002> |
+| Prometheus | <http://127.0.0.1:9090> |
+| Loki API | <http://127.0.0.1:3100> |
+| Floci AWS emulator | <http://127.0.0.1:4566> |
+
+To change host-facing addresses, copy `.env.example` to `.env` and edit the
+values. Container-to-container endpoints remain internal to Docker Compose.
+
+## Requirements
+
+- macOS, Linux, or WSL 2; beta validation is still in progress.
+- Git, Docker with Compose v2, Make, and `curl`.
+- 4 CPU cores, 8 GB system memory, and 6 GB free disk space as the initial target.
+
+See [Getting started](docs/GETTING_STARTED.md) for setup and the learner
+workflow, and [Architecture](docs/ARCHITECTURE.md) for the system design.
+
+## Scenario authors
+
+```bash
 make new-incident ID=inc-002
+make validate-scenarios
 ```
 
-Grafana is available at `http://127.0.0.1:3002` while OutageGym is running.
-
-To customize host-facing ports, copy `.env.example` to `.env` and change the
-values there. Service-to-service endpoints remain isolated inside Compose.
-
-`make grade` checks observable behaviour after a repair and reports the written
-rubric as `NOT REVIEWED`; it does not require one prescribed implementation.
-
-`make reset` archives learner changes under `.outagegym/archives/<incident>/`
-before restoring the incident baseline.
-
-## MVP
-
-The first incident, `inc-001`, uses this application path:
-
-```text
-Client -> Order API -> SQS order queue -> Order worker -> DynamoDB
-```
-
-The local runtime will use Docker Compose, Floci, Terraform, TypeScript services, and open-source observability tools. It will not require an AWS account or real AWS credentials.
-
-## Planned prerequisites
-
-- macOS or Linux.
-- Git.
-- Docker with Docker Compose.
-- Make and `curl`.
-- 4 CPU cores, 8 GB system memory, and 6 GB free disk space.
+See the [incident authoring guide](docs/INCIDENT_AUTHORING.md) and
+[scenario interfaces](docs/SCENARIO_INTERFACES.md).
 
 ## Project status
 
-Phase 7—the reusable scenario framework—is complete. See the
-[roadmap](ROADMAP.md) for verified progress.
+Phases 1–7 are complete. Phase 8—developer experience and public beta—is in
+progress. See the [roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
 
-- [Product specification](docs/PRODUCT.md)
-- [MVP architecture decision](docs/architecture/adr-001-mvp-scope.md)
+- [Getting started](docs/GETTING_STARTED.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Incident authoring guide](docs/INCIDENT_AUTHORING.md)
 - [Floci compatibility results](spikes/floci-compatibility/COMPATIBILITY.md)
 
 ## License
