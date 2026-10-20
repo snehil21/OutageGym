@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://outagegym.dev/schemas/scenario-manifest.schema.json",
+  "title": "OutageGym scenario manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "difficulty",
+    "resources",
+    "documents",
+    "system",
+    "commands",
+    "investigation",
+    "initial_signal",
+    "required_outcomes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^inc-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "difficulty": {
+      "$ref": "#/$defs/difficulty"
+    },
+    "resources": {
+      "$ref": "#/$defs/resources"
+    },
+    "documents": {
+      "$ref": "#/$defs/documents"
+    },
+    "system": {
+      "$ref": "#/$defs/system"
+    },
+    "commands": {
+      "$ref": "#/$defs/commands"
+    },
+    "investigation": {
+      "$ref": "#/$defs/investigation"
+    },
+    "initial_signal": {
+      "$ref": "#/$defs/initial_signal"
+    },
+    "required_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "relative_file": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "component_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "difficulty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "interacting_causes",
+        "evidence_sources",
+        "repair_tradeoffs"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "beginner",
+            "intermediate",
+            "advanced"
+          ]
+        },
+        "interacting_causes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "evidence_sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "alerts",
+              "configuration",
+              "logs",
+              "metrics",
+              "resource_state"
+            ]
+          }
+        },
+        "repair_tradeoffs": {
+          "type": "boolean"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_host",
+        "required_services"
+      ],
+      "properties": {
+        "minimum_host": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "logical_cpu_cores",
+            "memory_gb",
+            "free_disk_gb"
+          ],
+          "properties": {
+            "logical_cpu_cores": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "memory_gb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "free_disk_gb": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "required_services": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/component_name"
+          }
+        }
+      }
+    },
+    "documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "brief",
+        "evidence",
+        "postmortem"
+      ],
+      "properties": {
+        "brief": {
+          "$ref": "#/$defs/relative_file"
+        },
+        "evidence": {
+          "$ref": "#/$defs/relative_file"
+        },
+        "postmortem": {
+          "$ref": "#/$defs/relative_file"
+        }
+      }
+    },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entrypoint",
+        "processing_service",
+        "queue",
+        "store"
+      ],
+      "properties": {
+        "entrypoint": {
+          "$ref": "#/$defs/component_name"
+        },
+        "processing_service": {
+          "$ref": "#/$defs/component_name"
+        },
+        "queue": {
+          "$ref": "#/$defs/component_name"
+        },
+        "store": {
+          "$ref": "#/$defs/component_name"
+        }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "status",
+        "workload",
+        "reset",
+        "stop"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workload": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stop": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "investigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grafana_url",
+        "prometheus_url",
+        "loki_url"
+      ],
+      "properties": {
+        "grafana_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "prometheus_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "loki_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "initial_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "condition"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "alert",
+            "customer_report"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "condition": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

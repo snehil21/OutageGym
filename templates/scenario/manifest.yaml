@@ -1,0 +1,56 @@
+schema_version: 1
+id: {{INCIDENT_ID}}
+title: Describe the customer-visible symptom
+difficulty:
+  level: beginner
+  interacting_causes: 1
+  evidence_sources:
+    - alerts
+    - logs
+    - metrics
+  repair_tradeoffs: false
+
+resources:
+  minimum_host:
+    logical_cpu_cores: 4
+    memory_gb: 4
+    free_disk_gb: 6
+  required_services:
+    - floci
+    - grafana
+    - loki
+    - order-api
+    - order-worker
+    - otel-collector
+    - prometheus
+
+documents:
+  brief: brief.md
+  evidence: evidence.md
+  postmortem: postmortem-template.md
+
+system:
+  entrypoint: order-api
+  processing_service: order-worker
+  queue: order-processing
+  store: order-records
+
+commands:
+  start: make start INCIDENT={{INCIDENT_ID}}
+  status: make status INCIDENT={{INCIDENT_ID}}
+  workload: make workload INCIDENT={{INCIDENT_ID}}
+  reset: make reset INCIDENT={{INCIDENT_ID}}
+  stop: make stop INCIDENT={{INCIDENT_ID}}
+
+investigation:
+  grafana_url: http://127.0.0.1:3002
+  prometheus_url: http://127.0.0.1:9090
+  loki_url: http://127.0.0.1:3100
+
+initial_signal:
+  type: customer_report
+  name: Describe the initial signal
+  condition: Describe the observed condition
+
+required_outcomes:
+  - describe the observable behaviour that proves recovery
