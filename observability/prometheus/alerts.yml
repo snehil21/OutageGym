@@ -65,3 +65,12 @@ groups:
         annotations:
           summary: Completed orders are missing notification deliveries
           description: Notification records are not keeping pace with completed orders.
+
+      - alert: CheckoutLatencyHigh
+        expr: outagegym_api_checkout_slow_response_count_total > 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: Checkout response latency exceeds the expected service target
+          description: At least one checkout response exceeded the one-second service target.

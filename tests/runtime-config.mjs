@@ -59,6 +59,7 @@ export const runtimeConfig = Object.freeze({
     "4566",
   ),
   orderRecordsTableName: required("ORDER_RECORDS_TABLE_NAME"),
+  checkoutRequestsTableName: required("CHECKOUT_REQUESTS_TABLE_NAME"),
   orderCompletionEventBusName: required("ORDER_COMPLETION_EVENT_BUS_NAME"),
   notificationQueueUrl: localUrl(
     "NOTIFICATION_QUEUE_URL",

@@ -16,6 +16,10 @@ export const publishOrder = async (
           DataType: "String",
           StringValue: message.correlationId,
         },
+        idempotencyKey: {
+          DataType: "String",
+          StringValue: message.idempotencyKey,
+        },
         orderId: {
           DataType: "String",
           StringValue: message.orderId,
