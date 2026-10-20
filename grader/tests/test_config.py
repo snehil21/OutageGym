@@ -13,6 +13,7 @@ def local_environment() -> dict[str, str]:
         "AWS_REGION": "us-east-1",
         "AWS_ACCESS_KEY_ID": LOCAL_ACCESS_KEY_ID,
         "AWS_SECRET_ACCESS_KEY": LOCAL_SECRET_ACCESS_KEY,
+        "INCIDENT_ID": "inc-001",
         "ORDER_API_URL": "http://order-api:3000",
         "ORDER_PROCESSING_QUEUE_URL": (
             "http://floci:4566/000000000000/"
@@ -29,6 +30,7 @@ def test_load_config_accepts_local_floci_settings() -> None:
     assert config.aws_region == "us-east-1"
     assert config.aws_access_key_id == LOCAL_ACCESS_KEY_ID
     assert config.aws_secret_access_key == LOCAL_SECRET_ACCESS_KEY
+    assert config.incident_id == "inc-001"
     assert config.order_api_url == "http://order-api:3000"
     assert config.order_processing_queue_url.endswith(
         "/outagegym-inc-001-order-processing"
@@ -66,5 +68,16 @@ def test_load_config_rejects_non_local_order_api() -> None:
     with pytest.raises(
         ValueError,
         match="ORDER_API_URL must target the local Order API endpoint",
+    ):
+        load_config(environment)
+
+
+def test_load_config_rejects_unsafe_incident_id() -> None:
+    environment = local_environment()
+    environment["INCIDENT_ID"] = "../real-aws"
+
+    with pytest.raises(
+        ValueError,
+        match="INCIDENT_ID must contain only lowercase letters",
     ):
         load_config(environment)

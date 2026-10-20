@@ -51,7 +51,7 @@ grade: doctor
 	@$(COMPOSE) --profile tools run --rm grader || { echo "Error: Behavioural assessment failed."; exit 1; }
 	@$(COMPOSE) restart --timeout 15 order-worker || { echo "Error: Order worker failed to restart."; exit 1; }
 	@$(COMPOSE) up -d --wait order-worker || { echo "Error: Order worker was not ready after restart."; exit 1; }
-	@$(COMPOSE) --profile tools run --rm grader pytest tests/test_order_flow.py || { echo "Error: Repair did not survive the order-worker restart."; exit 1; }
+	@$(COMPOSE) --profile tools run --rm grader python -m outagegym_grader.report --tests tests/test_order_flow.py || { echo "Error: Repair did not survive the order-worker restart."; exit 1; }
 	@echo "OutageGym behavioural assessment passed."
 
 test-e2e: start

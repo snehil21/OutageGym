@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
 import os
+import re
 from urllib.parse import urlparse
 
 
@@ -16,6 +17,7 @@ class GraderConfig:
     aws_region: str
     aws_access_key_id: str
     aws_secret_access_key: str
+    incident_id: str
     order_api_url: str
     order_processing_queue_url: str
     order_records_table_name: str
@@ -26,6 +28,17 @@ def _required(environment: Mapping[str, str], name: str) -> str:
 
     if not value:
         raise ValueError(f"Missing required environment variable: {name}")
+
+    return value
+
+
+def _incident_id(environment: Mapping[str, str]) -> str:
+    value = environment.get("INCIDENT_ID", "inc-001")
+
+    if re.fullmatch(r"[a-z0-9-]+", value) is None:
+        raise ValueError(
+            "INCIDENT_ID must contain only lowercase letters, numbers, and hyphens"
+        )
 
     return value
 
@@ -82,6 +95,7 @@ def load_config(
         aws_region=environment.get("AWS_REGION", "us-east-1"),
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key,
+        incident_id=_incident_id(environment),
         order_api_url=_local_url(
             environment.get("ORDER_API_URL", "http://order-api:3000"),
             "ORDER_API_URL",

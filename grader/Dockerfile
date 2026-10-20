@@ -11,5 +11,6 @@ COPY grader/src ./src
 RUN python -m pip install --no-cache-dir ".[test]"
 
 COPY grader/tests ./tests
+COPY scenarios /workspace/scenarios
 
-CMD ["pytest"]
+CMD ["python", "-m", "outagegym_grader.report"]
