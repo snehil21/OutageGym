@@ -1,0 +1,24 @@
+{
+  "orders": [
+    {
+      "productId": "product-notification-001",
+      "quantity": 1,
+      "notificationChannel": "EMAIL"
+    },
+    {
+      "productId": "product-notification-002",
+      "quantity": 2,
+      "notificationChannel": "SMS"
+    },
+    {
+      "productId": "product-notification-003",
+      "quantity": 3,
+      "notificationChannel": "EMAIL"
+    },
+    {
+      "productId": "product-notification-004",
+      "quantity": 4,
+      "notificationChannel": "SMS"
+    }
+  ]
+}

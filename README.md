@@ -11,8 +11,8 @@ It is intended for backend engineers who already understand terminals, HTTP,
 Docker, and asynchronous processing. The first incident is intermediate and
 requires correlating evidence across multiple services.
 
-> Phase 8 public-beta preparation is in progress. The first incident is usable,
-> but cross-platform beta validation is not complete.
+> The first two incidents are usable. Cross-platform beta validation is still
+> in progress.
 
 ## Quick start
 
@@ -81,8 +81,9 @@ See the [incident authoring guide](docs/INCIDENT_AUTHORING.md) and
 
 ## Project status
 
-Phases 1–7 are complete. Phase 8—developer experience and public beta—is in
-progress. See the [roadmap](ROADMAP.md) for verified progress.
+The platform foundation is complete and the Phase 9 incident catalogue is in
+progress. `inc-001` and `inc-002` are available. See the
+[roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
 

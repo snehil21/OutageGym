@@ -153,6 +153,11 @@
           "expr": "outagegym_worker_queue_messages",
           "legendFormat": "{{state}}",
           "refId": "A"
+        },
+        {
+          "expr": "outagegym_notification_queue_messages",
+          "legendFormat": "notification available",
+          "refId": "B"
         }
       ],
       "title": "Queue Depth",
@@ -201,6 +206,11 @@
           "expr": "sum(rate(outagegym_worker_duplicate_prevention_count_total[1m]))",
           "legendFormat": "duplicates prevented",
           "refId": "C"
+        },
+        {
+          "expr": "sum by (channel, result) (rate(outagegym_notification_processing_count_total[1m]))",
+          "legendFormat": "notification {{channel}} {{result}}",
+          "refId": "D"
         }
       ],
       "title": "Worker Operational Events",
@@ -230,7 +240,7 @@
       },
       "targets": [
         {
-          "expr": "{service_namespace=\"outagegym\"} | event=~\"order_accepted|order_processed|message_processing_failed\"",
+          "expr": "{service_namespace=\"outagegym\"} | event=~\"order_accepted|order_processed|message_processing_failed|notification_processed|notification_processing_failed\"",
           "queryType": "range",
           "refId": "A"
         }

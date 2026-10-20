@@ -8,6 +8,7 @@ export interface WorkerConfig {
   orderProcessingQueueUrl: string;
   orderProcessingDurationMs: number;
   orderRecordsTableName: string;
+  orderCompletionEventBusName: string | undefined;
   orderStorageRevision: number;
   otlpEndpointUrl: string;
   receiveWaitTimeSeconds: number;
@@ -118,6 +119,8 @@ export const loadConfig = (
     600_000,
   ),
   orderRecordsTableName: readRequired(env, "ORDER_RECORDS_TABLE_NAME"),
+  orderCompletionEventBusName:
+    env.ORDER_COMPLETION_EVENT_BUS_NAME?.trim() || undefined,
   orderStorageRevision: readInteger(
     env,
     "ORDER_STORAGE_REVISION",

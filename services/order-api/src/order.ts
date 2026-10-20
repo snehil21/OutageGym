@@ -1,6 +1,9 @@
+export type NotificationChannel = "EMAIL" | "SMS";
+
 export interface CreateOrderRequest {
   productId: string;
   quantity: number;
+  notificationChannel?: NotificationChannel;
 }
 
 export interface OrderMessage {
@@ -10,6 +13,7 @@ export interface OrderMessage {
   acceptedAt: string;
   productId: string;
   quantity: number;
+  notificationChannel: NotificationChannel;
 }
 
 export interface CreateOrderResponse {

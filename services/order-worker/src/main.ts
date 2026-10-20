@@ -8,6 +8,7 @@ import {
 import { loadConfig } from "./config.js";
 import { startHealthServer } from "./health-server.js";
 import { processOrderMessage } from "./message-processor.js";
+import { publishOrderCompleted } from "./order-event-publisher.js";
 import {
   completeOrder,
   recordOrderProcessing,
@@ -94,6 +95,12 @@ const runWorker = async (): Promise<void> => {
     "outagegym.worker.duplicate_prevention.count",
     {
       description: "Number of duplicate order writes prevented",
+    },
+  );
+  const completionEventCount = telemetry.meter.createCounter(
+    "outagegym.worker.completion_event.count",
+    {
+      description: "Order completion events published by notification channel",
     },
   );
   const queueMessages = telemetry.meter.createObservableGauge(
@@ -187,6 +194,15 @@ const runWorker = async (): Promise<void> => {
                     storageRevision,
                   ),
                 now: () => new Date(),
+                publishOrderCompleted: (message, completedAt) =>
+                  config.orderCompletionEventBusName === undefined
+                    ? Promise.resolve(undefined)
+                    : publishOrderCompleted(
+                        clients.eventbridge,
+                        config.orderCompletionEventBusName,
+                        message,
+                        completedAt,
+                      ),
                 processOrder: async (message) => {
                   const duration =
                     message.quantity >= config.bulkOrderMinQuantity
@@ -239,14 +255,22 @@ const runWorker = async (): Promise<void> => {
             duplicatePreventionCount.add(1);
           }
 
+          if (result.completionEventId !== undefined) {
+            completionEventCount.add(1, {
+              channel: result.notificationChannel,
+            });
+          }
+
           telemetry.logger.emit({
             body: "Order processed",
             severityText: "INFO",
             attributes: {
               correlationId: result.correlationId,
+              completionEventId: result.completionEventId,
               event: "order_processed",
               messageId: result.messageId,
               orderId: result.orderId,
+              notificationChannel: result.notificationChannel,
               receiveCount: result.receiveCount,
               result: result.result,
             },

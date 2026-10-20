@@ -41,6 +41,10 @@ export const registerOrderRoute = (
               minimum: 1,
               maximum: 100,
             },
+            notificationChannel: {
+              type: "string",
+              enum: ["EMAIL", "SMS"],
+            },
           },
         },
       },
@@ -57,6 +61,7 @@ export const registerOrderRoute = (
         acceptedAt,
         productId: request.body.productId,
         quantity: request.body.quantity,
+        notificationChannel: request.body.notificationChannel ?? "EMAIL",
       });
 
       request.log.info(

@@ -1,0 +1,7 @@
+{
+  "source": ["outagegym.orders"],
+  "detail-type": ["OrderCompleted"],
+  "detail": {
+    "notificationChannel": ["EMAIL"]
+  }
+}
