@@ -155,10 +155,10 @@ make stop
 
 ### Tasks
 
-- [x] Define the primary learner persona. See `docs/PRODUCT.md`.
-- [x] Define beginner, intermediate, and advanced difficulty characteristics. See `docs/PRODUCT.md`.
-- [x] Define what learners may inspect during each stage. See `docs/PRODUCT.md`.
-- [x] Define what learners may modify. See `docs/PRODUCT.md`.
+- [x] Define the primary learner persona. See `README.md`.
+- [x] Define beginner, intermediate, and advanced difficulty characteristics. See `docs/INCIDENT_AUTHORING.md`.
+- [x] Define what learners may inspect during each stage. See `docs/GETTING_STARTED.md`.
+- [x] Define what learners may modify. See `docs/GETTING_STARTED.md`.
 - [x] Define the incident lifecycle:
   - [x] Detect
   - [x] Triage
@@ -167,19 +167,18 @@ make stop
   - [x] Repair
   - [x] Verify
   - [x] Write postmortem
-- [x] Finalize the common 100-point review rubric. See `docs/SCORING.md`.
+- [x] Finalize the common 100-point review rubric. See `docs/INCIDENT_AUTHORING.md`.
 - [x] Write the learner-visible `inc-001` brief using symptoms only. See `scenarios/inc-001/brief.md`.
-- [x] Document the internal causes and expected evidence separately. See `docs/maintainers/inc-001-design.md`.
-- [x] Document initial CPU, memory, disk, Docker, and Terraform targets that require later validation. See `docs/PRODUCT.md`.
-- [x] Decide how the honour-system source and assessment boundaries work. See `docs/PRODUCT.md`.
+- [x] Document the internal causes and expected evidence separately. See `scenarios/inc-001/maintainer.md`.
+- [x] Document initial CPU, memory, disk, Docker, and Terraform targets that require later validation. See `docs/GETTING_STARTED.md`.
+- [x] Decide how the honour-system source and assessment boundaries work. See `docs/ARCHITECTURE.md`.
 
 ### Deliverables
 
-- [x] `docs/PRODUCT.md`
+- [x] Product scope in `README.md` and `docs/GETTING_STARTED.md`
 - [x] `docs/INCIDENT_AUTHORING.md`
-- [x] `docs/SCORING.md`
-- [x] `docs/architecture/adr-001-mvp-scope.md`
-- [x] Internal design for `inc-001`: `docs/maintainers/inc-001-design.md`
+- [x] Architecture and key decisions in `docs/ARCHITECTURE.md`
+- [x] Internal design for `inc-001`: `scenarios/inc-001/maintainer.md`
 - [x] Learner brief: `scenarios/inc-001/brief.md`
 - [x] Evidence worksheet: `scenarios/inc-001/evidence.md`
 - [x] Postmortem template: `scenarios/inc-001/postmortem-template.md`
@@ -491,24 +490,24 @@ scenarios/inc-001/
 
 ### Documentation
 
-- [ ] Complete the README.
-- [ ] Add architecture diagrams.
-- [ ] Add installation instructions.
-- [ ] Add macOS instructions.
-- [ ] Add Linux instructions.
-- [ ] Add WSL notes.
-- [ ] Add troubleshooting documentation.
-- [ ] Add learner instructions.
-- [ ] Add scenario-authoring documentation.
-- [ ] Add security guidance.
+- [x] Complete the README.
+- [x] Add architecture diagrams.
+- [x] Add installation instructions.
+- [x] Add macOS instructions.
+- [x] Add Linux instructions.
+- [x] Add WSL notes.
+- [x] Add troubleshooting documentation.
+- [x] Add learner instructions.
+- [x] Add scenario-authoring documentation.
+- [x] Add security guidance.
 
 ### Distribution
 
 - [ ] Publish versioned application images to GHCR.
 - [ ] Pin all released images.
-- [ ] Add a GitHub release workflow.
-- [ ] Add release notes template.
-- [ ] Add automated clean-machine verification.
+- [x] Add a GitHub release workflow.
+- [x] Add release notes template.
+- [x] Add automated clean-machine verification.
 
 ### Beta validation
 
@@ -594,9 +593,9 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 7 closure
+**Active phase:** Phase 8 foundation ready; beta validation deferred
 
-**Next action:** Review and merge the reusable scenario framework, then begin public-beta developer experience work.
+**Next action:** Merge the developer-experience and release foundation, expand the catalogue to five scenarios, then complete native-platform and external beta validation before tagging the public beta.
 
 ## Open decisions
 

@@ -1,151 +1,97 @@
-# Incident Authoring Guide
+# Incident Authoring
 
-## Purpose
+Incidents should test operational reasoning, not filename recognition or
+solution copying.
 
-This guide defines how OutageGym incidents are designed so that they test operational reasoning rather than filename recognition or solution copying.
+## Design rules
 
-## Authoring principles
+- Begin with a customer symptom or alert, never the diagnosis.
+- Use opaque IDs such as `inc-002`; avoid names such as `broken-dlq`.
+- Make every required conclusion discoverable through operational evidence.
+- Include a reversible mitigation distinct from the permanent repair.
+- Keep seed data, workload, timing, and fault activation deterministic.
+- Grade observable outcomes rather than one expected code change.
+- Reset must restore the same initial broken state.
+- Use only local endpoints, fake credentials, and synthetic data.
 
-1. Begin with an observable customer or operational symptom.
-2. Never put the diagnosis in the scenario ID, service name, dashboard title, alert name, environment variable, or learner-facing comment.
-3. Every required conclusion must have discoverable evidence.
-4. Include at least one safe, reversible mitigation.
-5. Grade outcomes and invariants rather than an expected diff.
-6. Make time, traffic, data, and fault activation deterministic.
-7. Make reset restore the defined initial broken state.
-8. Do not require real cloud credentials or public service calls during incident execution.
+An incident should take the learner through detection, triage, diagnosis,
+mitigation, repair, verification, and a postmortem. Difficulty comes from the
+reasoning required and evidence that must be correlated—not container count.
 
-## Scenario identity
+## Create a scenario
 
-Use opaque IDs:
-
-```text
-inc-001
-inc-002
-inc-003
+```bash
+make new-incident ID=inc-002
 ```
 
-Avoid diagnostic names such as `lambda-timeout`, `broken-dlq`, or `sqs-duplicate-processing`.
+The command creates and validates `scenarios/inc-002/`. Customize:
 
-## Required incident lifecycle
+| File | Purpose |
+|---|---|
+| `manifest.yaml` | Identity, resources, interfaces, and required outcomes |
+| `brief.md` | Learner-visible symptom, topology, objectives, and constraints |
+| `evidence.md` | Investigation worksheet |
+| `postmortem-template.md` | Written incident review |
+| `seed/data.json` | Deterministic starting data |
+| `fault-config/runtime.env` | Non-spoiling runtime configuration |
+| `hooks/*.sh` | Optional lifecycle, fault, seed, or grading behaviour |
 
-### Detect
+The manifest must match `schemas/scenario-manifest.schema.json`, and its ID must
+match the directory name.
 
-Provide an initial alert or customer report. It should identify that something is wrong without identifying why.
+## Extension points
 
-### Triage
+- Put scenario traffic in `workloads/k6/<incident-id>.js`; otherwise the shared
+  happy-path workload is used.
+- Put incident verification in `tests/incidents/<incident-id>.mjs`.
+- Put executable lifecycle hooks in `scenarios/<incident-id>/hooks/`. Their
+  contract is documented in [Scenario Interfaces](SCENARIO_INTERFACES.md).
+- Add `hooks/grade.sh` only when the shared grader cannot express the outcome.
 
-Require the learner to determine impact, blast radius, start time, affected paths, and urgency.
+Prefer these interfaces over scenario-specific conditionals in shared platform
+code.
 
-### Diagnose
+## Assessment
 
-Require explicit hypotheses. Each important cause must have at least two useful evidence sources where practical, such as one metric and one log or configuration observation.
+Automated grading verifies behaviour, data invariants, recovery, restart
+durability, telemetry, and local-only AWS access. It must reject detected
+shortcuts such as disabling traffic or telemetry, deleting failed work, changing
+the grader, or routing around the intended system.
 
-### Mitigate
+Written reasoning uses this human-reviewed rubric:
 
-Provide at least one reversible way to reduce present harm. Mitigation should not be identical to the permanent repair.
+| Area | Points |
+|---|---:|
+| Triage and customer impact | 20 |
+| Diagnosis supported by evidence | 25 |
+| Immediate mitigation | 20 |
+| Permanent repair | 20 |
+| Postmortem | 15 |
 
-### Repair
+A complete pass requires every mandatory behavioural invariant and at least
+75/100 after human review. Automation reports written work as `NOT REVIEWED`;
+it does not invent a qualitative score from filled fields.
 
-Allow more than one correct implementation when behavioural invariants can be preserved.
+## Validate before publishing
 
-### Verify
-
-Test the repaired system under the original workload, after restart, and against negative cases.
-
-### Write postmortem
-
-Require impact, timeline, root and contributing causes, mitigation, repair, detection gaps, and owned prevention actions.
-
-## Learner-visible package
-
-Every scenario must include:
-
-```text
-scenarios/<incident-id>/
-├── manifest.yaml
-├── brief.md
-├── evidence.md
-└── postmortem-template.md
+```bash
+make validate-scenarios
+tests/runtime/scenario-authoring.sh
+tests/runtime/scenario-hooks.sh
+make start INCIDENT=inc-002
+make workload INCIDENT=inc-002
+make grade INCIDENT=inc-002
+make reset INCIDENT=inc-002
+make stop INCIDENT=inc-002
 ```
 
-The learner-visible manifest must contain only non-spoiling metadata and lifecycle configuration. Diagnostic fault configuration belongs in maintainer-controlled files.
+Confirm that:
 
-Learner-visible material may contain:
-
-- Customer reports.
-- Alert text.
-- System topology at the level expected in a real on-call handoff.
-- Available investigation tools.
-- Safety constraints.
-- Scoring categories.
-
-It must not contain:
-
-- Root-cause names.
-- Exact repair instructions.
-- Spoiling variable names.
-- Dashboard panels named after failures.
-- Comments explaining planted defects.
-
-## Maintainer package
-
-Maintainer material records:
-
-- Planted root and contributing causes.
-- Activation mechanism.
-- Expected symptoms.
-- Required evidence.
-- Valid mitigations.
-- Valid permanent repairs.
-- Behavioural invariants.
-- Reset requirements.
-- False-positive and shortcut checks.
-
-Maintainer material is visible in a public local repository, so the MVP uses an honour-system boundary. Learners should be warned before entering it.
-
-## Difficulty review
-
-An incident is not advanced merely because it has more containers. Difficulty comes from reasoning complexity:
-
-- Number of interacting causes.
-- Ambiguity of initial symptoms.
-- Number of evidence sources that must be correlated.
-- Quality of misleading but truthful signals.
-- Repair trade-offs.
-- Verification depth.
-
-## Determinism checklist
-
-- [ ] Fixed seed data.
-- [ ] Controlled traffic rate.
-- [ ] Fault activation uses a controlled, repeatable condition.
-- [ ] Pseudo-random data uses a fixed seed.
-- [ ] Time-dependent behaviour uses controlled or relative timestamps.
-- [ ] No dependency on public services.
-- [ ] Reset removes scenario state and volumes.
-- [ ] Repeated runs produce equivalent symptoms and scores.
-
-## Safety checklist
-
-- [ ] AWS endpoint is local and validated.
-- [ ] Credentials are fake.
-- [ ] Ports bind to localhost.
-- [ ] No privileged container is required.
-- [ ] Docker socket is not mounted unless separately reviewed and documented.
-- [ ] No secrets or personal data are included.
-- [ ] Destructive actions are limited to scenario-owned resources.
-
-## Acceptance checklist
-
-Before publishing an incident:
-
-- [ ] An uninformed tester can reproduce the initial symptom.
-- [ ] The tester can diagnose it without source inspection.
-- [ ] Each required conclusion has evidence.
-- [ ] Partial repairs receive partial credit.
-- [ ] Superficial workarounds fail.
-- [ ] At least two safe correct repairs are accepted where feasible.
-- [ ] Restart verification passes after a correct repair.
-- [ ] Reset restores the defined initial broken state.
-- [ ] Learner-facing text contains no diagnosis spoilers.
+- An uninformed tester can reproduce and diagnose the symptom without source
+  inspection.
+- Learner-facing text contains no diagnosis or repair spoilers.
+- Required conclusions have evidence and safe repairs satisfy the grader.
+- Ports bind to localhost; no secrets, privileged containers, or runtime socket
+  mounts were added.
+- Repeated workloads and resets produce equivalent results.
+- The scenario cannot alter another scenario or unrelated host resources.

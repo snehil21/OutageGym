@@ -17,7 +17,7 @@ SCENARIO_HOOK := ./scripts/scenario-hook.sh "$(INCIDENT)"
 SCENARIO_GRADE_HOOK := scenarios/$(INCIDENT)/hooks/grade.sh
 NEW_SCENARIO_VALIDATOR := INCIDENT_ID="$(ID)" docker compose -p "outagegym-$(ID)" -f compose.yaml --profile tools run --rm --build scenario-validator "$(ID)"
 
-.PHONY: doctor validate-scenarios list new-incident start status stop reset workload grade grade-default test-e2e test-observability test-incident
+.PHONY: doctor validate-scenarios list new-incident start status stop reset workload grade grade-current-runtime grade-default install-test-dependencies test-e2e test-e2e-current-runtime test-observability test-incident
 
 doctor:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed or not on PATH."; exit 1; }
@@ -76,6 +76,9 @@ workload: start
 
 grade: doctor
 	@$(COMPOSE) up -d --build --wait order-api order-worker || { echo "Error: Application services failed to start for grading."; exit 1; }
+	@$(MAKE) --no-print-directory grade-current-runtime INCIDENT="$(INCIDENT)"
+
+grade-current-runtime:
 	@if [ -e "$(SCENARIO_GRADE_HOOK)" ]; then \
 		$(SCENARIO_HOOK) grade; \
 	else \
@@ -90,8 +93,12 @@ grade-default:
 	@$(COMPOSE) --profile tools run --rm grader python -m outagegym_grader.report --tests tests/test_order_flow.py || { echo "Error: Repair did not survive the order-worker restart."; exit 1; }
 	@echo "OutageGym behavioural assessment passed."
 
-test-e2e: start
+install-test-dependencies:
 	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
+
+test-e2e: start install-test-dependencies test-e2e-current-runtime
+
+test-e2e-current-runtime:
 	@$(COMPOSE) --profile tools run --rm node node tests/e2e/healthy-order-flow.mjs
 	@$(COMPOSE) --profile tools run --rm node node tests/e2e/duplicate-delivery.mjs
 
