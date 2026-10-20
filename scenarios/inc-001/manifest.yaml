@@ -1,7 +1,30 @@
 schema_version: 1
 id: inc-001
 title: Orders are not completing reliably
-difficulty: intermediate
+difficulty:
+  level: intermediate
+  interacting_causes: 3
+  evidence_sources:
+    - alerts
+    - configuration
+    - logs
+    - metrics
+    - resource_state
+  repair_tradeoffs: true
+
+resources:
+  minimum_host:
+    logical_cpu_cores: 4
+    memory_gb: 4
+    free_disk_gb: 6
+  required_services:
+    - floci
+    - grafana
+    - loki
+    - order-api
+    - order-worker
+    - otel-collector
+    - prometheus
 
 documents:
   brief: brief.md

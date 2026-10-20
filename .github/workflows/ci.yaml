@@ -26,6 +26,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Verify scenario framework
+        run: |
+          make validate-scenarios
+          sh tests/runtime/scenario-hooks.sh
+          sh tests/runtime/scenario-authoring.sh
+
       - name: Verify learner workspace reset
         run: sh tests/runtime/learner-workspace.sh
 

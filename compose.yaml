@@ -46,6 +46,7 @@ services:
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -69,6 +70,7 @@ services:
       - *loki-host-binding
     volumes:
       - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki-data:/loki
     command:
       - -config.file=/etc/loki/loki.yml
     healthcheck:
@@ -108,6 +110,7 @@ services:
     ports:
       - *grafana-host-binding
     volumes:
+      - grafana-data:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
@@ -269,6 +272,17 @@ services:
     networks:
       - lab
 
+  scenario-validator:
+    build:
+      context: ./scripts/scenario-validator
+    image: outagegym/scenario-validator:local
+    profiles:
+      - tools
+    working_dir: /workspace
+    volumes:
+      - .:/workspace:ro
+    network_mode: none
+
   grader:
     build:
       context: .
@@ -312,3 +326,8 @@ services:
 networks:
   lab:
     driver: bridge
+
+volumes:
+  grafana-data:
+  loki-data:
+  prometheus-data:

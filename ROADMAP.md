@@ -463,25 +463,25 @@ scenarios/inc-001/
 
 ### Tasks
 
-- [ ] Define the scenario manifest JSON Schema.
-- [ ] Validate manifests before startup.
-- [ ] Create scenario lifecycle hooks.
-- [ ] Create the seed-data interface.
-- [ ] Create the fault-injection interface.
-- [ ] Create the grader plugin interface.
-- [ ] Add scenario resource requirements.
-- [ ] Add difficulty metadata.
-- [ ] Isolate networks and volumes by scenario.
-- [ ] Implement `make list`.
-- [ ] Implement `make new-incident ID=inc-002`.
-- [ ] Add a scenario-author template.
+- [x] Define the scenario manifest JSON Schema.
+- [x] Validate manifests before startup.
+- [x] Create scenario lifecycle hooks.
+- [x] Create the seed-data interface.
+- [x] Create the fault-injection interface.
+- [x] Create the grader plugin interface.
+- [x] Add scenario resource requirements.
+- [x] Add difficulty metadata.
+- [x] Isolate networks and volumes by scenario.
+- [x] Implement `make list`.
+- [x] Implement `make new-incident ID=inc-002`.
+- [x] Add a scenario-author template.
 
 ### Exit criteria
 
-- [ ] A new scenario does not require platform-core changes.
-- [ ] Invalid manifests fail before containers start.
-- [ ] Scenarios cannot leak state into each other.
-- [ ] Platform upgrades do not require duplicated scenario configuration.
+- [x] A new scenario does not require platform-core changes.
+- [x] Invalid manifests fail before containers start.
+- [x] Scenarios cannot leak state into each other.
+- [x] Platform upgrades do not require duplicated scenario configuration.
 
 ---
 
@@ -594,9 +594,9 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 6 closure
+**Active phase:** Phase 7 closure
 
-**Next action:** Review and merge the behavioural grader, then begin the reusable scenario framework.
+**Next action:** Review and merge the reusable scenario framework, then begin public-beta developer experience work.
 
 ## Open decisions
 
@@ -669,3 +669,6 @@ Potential technologies and failure domains:
 - Added neutral terminal and machine-readable JSON reports without revealing the intended diagnosis or repair.
 - Added deterministic written-artifact structure checks with a human-owned 100-point rubric and `NOT REVIEWED` default status.
 - Added repeated healthy assessment runs to CI while preserving the intentionally broken default incident.
+- Added schema-validated scenario manifests, lifecycle extension hooks, resource metadata, and incident-scoped persistent storage.
+- Added reusable seed, fault-injection, and grader interfaces plus scenario authoring and listing commands.
+- Added CI coverage for manifest validation, scenario generation, hook contracts, and cross-scenario isolation.

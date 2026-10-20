@@ -20,6 +20,13 @@ make reset INCIDENT=inc-001
 make stop INCIDENT=inc-001
 ```
 
+List available incidents or create an authoring skeleton with:
+
+```bash
+make list
+make new-incident ID=inc-002
+```
+
 Grafana is available at `http://127.0.0.1:3002` while OutageGym is running.
 
 To customize host-facing ports, copy `.env.example` to `.env` and change the
@@ -51,7 +58,7 @@ The local runtime will use Docker Compose, Floci, Terraform, TypeScript services
 
 ## Project status
 
-Phase 6—behavioural assessment and rubric support—is complete. See the
+Phase 7—the reusable scenario framework—is complete. See the
 [roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
