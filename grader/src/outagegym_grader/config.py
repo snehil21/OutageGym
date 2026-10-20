@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 
 LOCAL_AWS_HOSTS = frozenset({"floci", "localhost", "127.0.0.1"})
+LOCAL_ORDER_API_HOSTS = frozenset({"order-api", "localhost", "127.0.0.1"})
 LOCAL_ACCESS_KEY_ID = "outagegym-local"
 LOCAL_SECRET_ACCESS_KEY = "outagegym-local-only"
 
@@ -15,6 +16,7 @@ class GraderConfig:
     aws_region: str
     aws_access_key_id: str
     aws_secret_access_key: str
+    order_api_url: str
     order_processing_queue_url: str
     order_records_table_name: str
 
@@ -28,20 +30,36 @@ def _required(environment: Mapping[str, str], name: str) -> str:
     return value
 
 
-def _local_aws_url(environment: Mapping[str, str], name: str) -> str:
-    value = _required(environment, name)
+def _local_url(
+    value: str,
+    name: str,
+    allowed_hosts: frozenset[str],
+    expected_port: int,
+    service_name: str,
+) -> str:
     parsed = urlparse(value)
 
     if (
         parsed.scheme != "http"
-        or parsed.hostname not in LOCAL_AWS_HOSTS
-        or parsed.port != 4566
+        or parsed.hostname not in allowed_hosts
+        or parsed.port != expected_port
     ):
         raise ValueError(
-            f"{name} must target the local Floci endpoint on port 4566"
+            f"{name} must target the local {service_name} endpoint "
+            f"on port {expected_port}"
         )
 
     return value
+
+
+def _local_aws_url(environment: Mapping[str, str], name: str) -> str:
+    return _local_url(
+        _required(environment, name),
+        name,
+        LOCAL_AWS_HOSTS,
+        4566,
+        "Floci",
+    )
 
 
 def load_config(
@@ -64,6 +82,13 @@ def load_config(
         aws_region=environment.get("AWS_REGION", "us-east-1"),
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key,
+        order_api_url=_local_url(
+            environment.get("ORDER_API_URL", "http://order-api:3000"),
+            "ORDER_API_URL",
+            LOCAL_ORDER_API_HOSTS,
+            3000,
+            "Order API",
+        ),
         order_processing_queue_url=_local_aws_url(
             environment,
             "ORDER_PROCESSING_QUEUE_URL",
