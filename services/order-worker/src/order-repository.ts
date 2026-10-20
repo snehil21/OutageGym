@@ -36,6 +36,9 @@ export const recordOrderProcessing = async (
           status: { S: "PROCESSING" },
           schemaVersion: { N: String(message.schemaVersion) },
           correlationId: { S: message.correlationId },
+          ...(message.idempotencyKey === undefined
+            ? {}
+            : { idempotencyKey: { S: message.idempotencyKey } }),
           acceptedAt: { S: message.acceptedAt },
           processingStartedAt: { S: startedAt },
           productId: { S: message.productId },
@@ -82,6 +85,9 @@ export const completeOrder = async (
     status: { S: "COMPLETED" },
     schemaVersion: { N: String(message.schemaVersion) },
     correlationId: { S: message.correlationId },
+    ...(message.idempotencyKey === undefined
+      ? {}
+      : { idempotencyKey: { S: message.idempotencyKey } }),
     acceptedAt: { S: message.acceptedAt },
     completedAt: { S: completedAt },
     productId: { S: message.productId },
@@ -108,6 +114,9 @@ export const completeOrder = async (
                   recordId: { S: "FULFILMENT" },
                   recordType: { S: "FULFILMENT" },
                   correlationId: { S: message.correlationId },
+                  ...(message.idempotencyKey === undefined
+                    ? {}
+                    : { idempotencyKey: { S: message.idempotencyKey } }),
                   createdAt: { S: completedAt },
                 },
                 ConditionExpression:
@@ -138,6 +147,9 @@ export const completeOrder = async (
         },
         recordType: { S: "FULFILMENT" },
         correlationId: { S: message.correlationId },
+        ...(message.idempotencyKey === undefined
+          ? {}
+          : { idempotencyKey: { S: message.idempotencyKey } }),
         createdAt: { S: completedAt },
       },
     }),

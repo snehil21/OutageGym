@@ -1,0 +1,28 @@
+{
+  "orders": [
+    {
+      "idempotencyKey": "inc003-checkout-001",
+      "productId": "product-inc003-normal-001",
+      "quantity": 1,
+      "expectTimeout": false
+    },
+    {
+      "idempotencyKey": "inc003-checkout-002",
+      "productId": "product-inc003-timeout-002",
+      "quantity": 2,
+      "expectTimeout": true
+    },
+    {
+      "idempotencyKey": "inc003-checkout-003",
+      "productId": "product-inc003-normal-003",
+      "quantity": 3,
+      "expectTimeout": false
+    },
+    {
+      "idempotencyKey": "inc003-checkout-004",
+      "productId": "product-inc003-timeout-004",
+      "quantity": 4,
+      "expectTimeout": true
+    }
+  ]
+}

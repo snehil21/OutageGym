@@ -11,7 +11,7 @@ It is intended for backend engineers who already understand terminals, HTTP,
 Docker, and asynchronous processing. The first incident is intermediate and
 requires correlating evidence across multiple services.
 
-> The first two incidents are usable. Cross-platform beta validation is still
+> The first three incidents are usable. Cross-platform beta validation is still
 > in progress.
 
 ## Quick start
@@ -81,9 +81,9 @@ See the [incident authoring guide](docs/INCIDENT_AUTHORING.md) and
 
 ## Project status
 
-The platform foundation is complete and the Phase 9 incident catalogue is in
-progress. `inc-001` and `inc-002` are available. See the
-[roadmap](ROADMAP.md) for verified progress.
+The initial three-incident catalogue is complete. `inc-001`, `inc-002` and
+`inc-003` are available. See the [changelog](CHANGELOG.md) for completed
+milestones.
 
 ## Documentation
 
@@ -91,6 +91,7 @@ progress. `inc-001` and `inc-002` are available. See the
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Incident authoring guide](docs/INCIDENT_AUTHORING.md)
+- [Changelog](CHANGELOG.md)
 - [Floci compatibility results](spikes/floci-compatibility/COMPATIBILITY.md)
 
 ## License

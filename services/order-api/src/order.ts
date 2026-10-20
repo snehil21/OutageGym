@@ -10,6 +10,7 @@ export interface OrderMessage {
   schemaVersion: 1;
   orderId: string;
   correlationId: string;
+  idempotencyKey: string;
   acceptedAt: string;
   productId: string;
   quantity: number;

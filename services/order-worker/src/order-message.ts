@@ -2,6 +2,7 @@ export interface OrderMessage {
   schemaVersion: 1;
   orderId: string;
   correlationId: string;
+  idempotencyKey?: string;
   acceptedAt: string;
   productId: string;
   quantity: number;
@@ -16,6 +17,23 @@ const readNonEmptyString = (
   name: string,
 ): string => {
   const field = value[name];
+
+  if (typeof field !== "string" || field.trim() === "") {
+    throw new Error(`Order message field ${name} must be a non-empty string`);
+  }
+
+  return field;
+};
+
+const readOptionalNonEmptyString = (
+  value: Record<string, unknown>,
+  name: string,
+): string | undefined => {
+  const field = value[name];
+
+  if (field === undefined) {
+    return undefined;
+  }
 
   if (typeof field !== "string" || field.trim() === "") {
     throw new Error(`Order message field ${name} must be a non-empty string`);
@@ -49,6 +67,7 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
   const productId = readNonEmptyString(value, "productId");
   const quantity = value.quantity;
   const notificationChannel = value.notificationChannel ?? "EMAIL";
+  const idempotencyKey = readOptionalNonEmptyString(value, "idempotencyKey");
 
   if (Number.isNaN(Date.parse(acceptedAt))) {
     throw new Error("Order message field acceptedAt must be a valid timestamp");
@@ -77,6 +96,7 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
     schemaVersion: 1,
     orderId: readNonEmptyString(value, "orderId"),
     correlationId: readNonEmptyString(value, "correlationId"),
+    ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
     acceptedAt,
     productId,
     quantity,

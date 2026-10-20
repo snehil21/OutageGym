@@ -20,6 +20,7 @@ x-outagegym-runtime:
   grafana-url: &grafana-url http://grafana:3000
   order-processing-queue-url: &order-processing-queue-url http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
   order-records-table-name: &order-records-table-name outagegym-${INCIDENT_ID:-inc-001}-order-records
+  checkout-requests-table-name: &checkout-requests-table-name outagegym-${INCIDENT_ID:-inc-001}-checkout-requests
   prometheus-health-url: &prometheus-health-url http://127.0.0.1:9090/-/ready
   grafana-health-url: &grafana-health-url http://127.0.0.1:3000/api/health
   order-api-health-command: &order-api-health-command fetch('http://127.0.0.1:3000/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
@@ -157,6 +158,11 @@ services:
       AWS_REGION: *aws-region
       OTEL_EXPORTER_OTLP_ENDPOINT: *otlp-endpoint-url
       ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
+      CHECKOUT_REQUESTS_TABLE_NAME: *checkout-requests-table-name
+      CHECKOUT_IDEMPOTENCY_ENABLED: ${CHECKOUT_IDEMPOTENCY_ENABLED:-true}
+      CHECKOUT_AMBIGUOUS_FAILURES_ENABLED: ${CHECKOUT_AMBIGUOUS_FAILURES_ENABLED:-false}
+      CHECKOUT_AMBIGUOUS_FAILURE_DELAY_MS: ${CHECKOUT_AMBIGUOUS_FAILURE_DELAY_MS:-1500}
+      CHECKOUT_AMBIGUOUS_FAILURE_PRODUCT_PREFIX: ${CHECKOUT_AMBIGUOUS_FAILURE_PRODUCT_PREFIX:-product-inc003-timeout}
     depends_on:
       floci:
         condition: service_healthy
@@ -303,6 +309,7 @@ services:
       AWS_REGION: *aws-region
       ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
       ORDER_RECORDS_TABLE_NAME: *order-records-table-name
+      CHECKOUT_REQUESTS_TABLE_NAME: *checkout-requests-table-name
       ORDER_COMPLETION_EVENT_BUS_NAME: *order-completion-event-bus-name
       NOTIFICATION_QUEUE_URL: *notification-queue-url
       NOTIFICATION_RECORDS_TABLE_NAME: *notification-records-table-name
