@@ -24,7 +24,7 @@ def read_order_records(
     return response.get("Items", [])
 
 
-def queue_is_empty(sqs: BaseClient, queue_url: str) -> bool:
+def read_queue_depth(sqs: BaseClient, queue_url: str) -> int:
     response = sqs.get_queue_attributes(
         QueueUrl=queue_url,
         AttributeNames=[
@@ -34,9 +34,36 @@ def queue_is_empty(sqs: BaseClient, queue_url: str) -> bool:
     )
     attributes = response.get("Attributes", {})
 
-    return (
-        attributes.get("ApproximateNumberOfMessages") == "0"
-        and attributes.get("ApproximateNumberOfMessagesNotVisible") == "0"
+    return sum(
+        int(attributes.get(name, "0"))
+        for name in (
+            "ApproximateNumberOfMessages",
+            "ApproximateNumberOfMessagesNotVisible",
+        )
+    )
+
+
+def queue_is_empty(sqs: BaseClient, queue_url: str) -> bool:
+    return read_queue_depth(sqs, queue_url) == 0
+
+
+def wait_for_queue_depth(
+    sqs: BaseClient,
+    queue_url: str,
+    maximum_depth: int,
+    timeout_seconds: float = 60,
+) -> None:
+    deadline = time.monotonic() + timeout_seconds
+
+    while time.monotonic() < deadline:
+        if read_queue_depth(sqs, queue_url) <= maximum_depth:
+            return
+
+        time.sleep(POLL_INTERVAL_SECONDS)
+
+    raise AssertionError(
+        f"Queue depth did not return to {maximum_depth} or lower within "
+        f"{timeout_seconds:g} seconds"
     )
 
 

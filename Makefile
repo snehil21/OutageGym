@@ -9,7 +9,7 @@ HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
 LEARNER_WORKSPACE := ./scripts/learner-workspace.sh
 
-.PHONY: doctor start status stop reset workload test-e2e test-observability test-incident
+.PHONY: doctor start status stop reset workload grade test-e2e test-observability test-incident
 
 doctor:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed or not on PATH."; exit 1; }
@@ -44,6 +44,15 @@ reset: doctor
 
 workload: start
 	@$(COMPOSE) --profile tools run --rm k6 run /workloads/k6/$(WORKLOAD_FILE)
+
+grade: doctor
+	@$(COMPOSE) up -d --build --wait order-api order-worker || { echo "Error: Application services failed to start for grading."; exit 1; }
+	@$(COMPOSE) --profile tools build grader || { echo "Error: Grader image failed to build."; exit 1; }
+	@$(COMPOSE) --profile tools run --rm grader || { echo "Error: Behavioural assessment failed."; exit 1; }
+	@$(COMPOSE) restart --timeout 15 order-worker || { echo "Error: Order worker failed to restart."; exit 1; }
+	@$(COMPOSE) up -d --wait order-worker || { echo "Error: Order worker was not ready after restart."; exit 1; }
+	@$(COMPOSE) --profile tools run --rm grader pytest tests/test_order_flow.py || { echo "Error: Repair did not survive the order-worker restart."; exit 1; }
+	@echo "OutageGym behavioural assessment passed."
 
 test-e2e: start
 	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
