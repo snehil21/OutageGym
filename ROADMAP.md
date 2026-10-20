@@ -43,19 +43,19 @@ make reset INCIDENT=inc-001
 
 ### Included
 
-- [ ] One complete AWS-oriented incident: `inc-001`
-- [ ] Docker Compose orchestration
-- [ ] Floci for local AWS-compatible services
-- [ ] Terraform for infrastructure provisioning
-- [ ] TypeScript application services
-- [ ] Metrics and centralized logs
-- [ ] Repeatable load generation
-- [ ] Automated behavioural assessment
-- [ ] Postmortem submission and rubric
-- [ ] Makefile-based lifecycle commands
-- [ ] Local-only execution
-- [ ] macOS and Linux support
-- [ ] CI smoke testing
+- [x] One complete AWS-oriented incident: `inc-001`
+- [x] Docker Compose orchestration
+- [x] Floci for local AWS-compatible services
+- [x] Terraform for infrastructure provisioning
+- [x] TypeScript application services
+- [x] Metrics and centralized logs
+- [x] Repeatable load generation
+- [x] Automated behavioural assessment
+- [x] Postmortem submission and rubric
+- [x] Makefile-based lifecycle commands
+- [x] Local-only execution
+- [x] macOS and Linux support
+- [x] CI smoke testing
 
 ### Explicitly outside the MVP
 
@@ -425,35 +425,35 @@ scenarios/inc-001/
 
 ### Grader
 
-- [ ] Establish the Python grader package.
-- [ ] Add pytest configuration.
-- [ ] Add boto3 local endpoint configuration.
-- [ ] Check order completion behaviour.
-- [ ] Check that queue backlog drains.
-- [ ] Check duplicate prevention.
-- [ ] Check the expected failure-recovery path.
-- [ ] Run a load-based regression check.
-- [ ] Restart services and verify repair durability.
-- [ ] Detect unsafe or superficial workarounds.
-- [ ] Collect learner evidence and postmortem paths.
-- [ ] Produce machine-readable JSON results.
-- [ ] Produce a readable terminal behavioural report.
+- [x] Establish the Python grader package.
+- [x] Add pytest configuration.
+- [x] Add boto3 local endpoint configuration.
+- [x] Check order completion behaviour.
+- [x] Check that queue backlog drains.
+- [x] Check duplicate prevention.
+- [x] Check the expected failure-recovery path.
+- [x] Run a load-based regression check.
+- [x] Restart services and verify repair durability.
+- [x] Detect unsafe or superficial workarounds.
+- [x] Collect learner evidence and postmortem paths.
+- [x] Produce machine-readable JSON results.
+- [x] Produce a readable terminal behavioural report.
 
 ### Rubric support
 
-- [ ] Validate required evidence-workbook structure.
-- [ ] Validate required postmortem structure.
-- [ ] Report the written rubric as `NOT REVIEWED` by default.
-- [ ] Document self-review and peer-review use of the 100-point rubric.
-- [ ] Keep any future AI-assisted review optional and non-authoritative.
+- [x] Validate required evidence-workbook structure.
+- [x] Validate required postmortem structure.
+- [x] Report the written rubric as `NOT REVIEWED` by default.
+- [x] Document self-review and peer-review use of the 100-point rubric.
+- [x] Keep any future AI-assisted review optional and non-authoritative.
 
 ### Exit criteria
 
-- [ ] Multiple correct implementations can pass.
-- [ ] Superficial workarounds fail.
-- [ ] Automated behavioural results are deterministic across repeated runs.
-- [ ] Normal grader output does not reveal the intended diagnosis or repair.
-- [ ] Assessment never contacts real AWS.
+- [x] Multiple correct implementations can pass.
+- [x] Superficial workarounds fail.
+- [x] Automated behavioural results are deterministic across repeated runs.
+- [x] Normal grader output does not reveal the intended diagnosis or repair.
+- [x] Assessment never contacts real AWS.
 
 ---
 
@@ -586,17 +586,17 @@ Potential technologies and failure domains:
 - [x] The initial incident is reproducible.
 - [x] The learner can investigate using documented tools.
 - [ ] At least two valid repair approaches are accepted.
-- [ ] `make grade INCIDENT=inc-001` returns a deterministic behavioural result and written-rubric review status.
+- [x] `make grade INCIDENT=inc-001` returns a deterministic behavioural result and written-rubric review status.
 - [x] `make reset INCIDENT=inc-001` restores the defined initial incident while preserving archived learner work.
 - [x] `make stop` cleans up safely.
-- [ ] CI validates startup, behavioural assessment, reset, and cleanup.
+- [x] CI validates startup, behavioural assessment, reset, and cleanup.
 - [ ] Three beta users complete the flow without author intervention.
 
 ## Current focus
 
-**Active phase:** Phase 5 closure
+**Active phase:** Phase 6 closure
 
-**Next action:** Review and merge the completed `inc-001` incident, then begin Phase 6 behavioural assessment.
+**Next action:** Review and merge the behavioural grader, then begin the reusable scenario framework.
 
 ## Open decisions
 
@@ -662,3 +662,10 @@ Potential technologies and failure domains:
 - Added deterministic interacting queue-timing, idempotency, and capacity faults for `inc-001`.
 - Added repeatable incident traffic plus broken-state, mitigation, complete-repair, and restart verification.
 - Added reset-time learner-work archiving and restoration of the immutable incident baseline.
+
+### 2026-10-20
+
+- Added a local behavioural grader for completion, recovery, duplicate prevention, restart durability, and runtime safety.
+- Added neutral terminal and machine-readable JSON reports without revealing the intended diagnosis or repair.
+- Added deterministic written-artifact structure checks with a human-owned 100-point rubric and `NOT REVIEWED` default status.
+- Added repeated healthy assessment runs to CI while preserving the intentionally broken default incident.

@@ -1,6 +1,16 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
+import { runtimeConfig } from "../runtime-config.mjs";
+
+const {
+  grafanaUrl,
+  lokiUrl,
+  orderApiUrl,
+  otelCollectorHealthUrl,
+  prometheusUrl,
+} = runtimeConfig;
+
 const request = async (url) => {
   const response = await fetch(url);
   const body = await response.text();
@@ -39,7 +49,7 @@ const eventually = async (check, description) => {
 const prometheusQuery = async (expression) => {
   const query = new URLSearchParams({ query: expression });
   const response = await requestJson(
-    `http://prometheus:9090/api/v1/query?${query}`,
+    `${prometheusUrl}/api/v1/query?${query}`,
   );
 
   assert.equal(response.status, "success");
@@ -54,7 +64,7 @@ const lokiQuery = async (expression) => {
     limit: "1",
   });
   const response = await requestJson(
-    `http://loki:3100/loki/api/v1/query_range?${query}`,
+    `${lokiUrl}/loki/api/v1/query_range?${query}`,
   );
 
   assert.equal(response.status, "success");
@@ -64,19 +74,19 @@ const lokiQuery = async (expression) => {
 };
 
 assert.match(
-  await request("http://prometheus:9090/-/ready"),
+  await request(`${prometheusUrl}/-/ready`),
   /ready/i,
 );
-assert.match(await request("http://loki:3100/ready"), /ready/i);
+assert.match(await request(`${lokiUrl}/ready`), /ready/i);
 
-const collectorHealth = await requestJson("http://otel-collector:13133/");
+const collectorHealth = await requestJson(`${otelCollectorHealthUrl}/`);
 assert.equal(collectorHealth.status, "Server available");
 
-const grafanaHealth = await requestJson("http://grafana:3000/api/health");
+const grafanaHealth = await requestJson(`${grafanaUrl}/api/health`);
 assert.equal(grafanaHealth.database, "ok");
 
 const dashboard = await requestJson(
-  "http://grafana:3000/api/dashboards/uid/outagegym-order-processing",
+  `${grafanaUrl}/api/dashboards/uid/outagegym-order-processing`,
 );
 assert.equal(dashboard.dashboard.title, "Order Processing Overview");
 const panelTitles = new Set(
@@ -98,7 +108,7 @@ for (const title of [
 }
 
 const ruleResponse = await requestJson(
-  "http://prometheus:9090/api/v1/rules?type=alert",
+  `${prometheusUrl}/api/v1/rules?type=alert`,
 );
 const alertGroup = ruleResponse.data.groups.find(
   (group) => group.name === "outagegym-order-processing",
@@ -119,7 +129,7 @@ for (const name of [
 }
 
 const testId = randomUUID();
-const orderResponse = await fetch("http://order-api:3000/orders", {
+const orderResponse = await fetch(`${orderApiUrl}/orders`, {
   method: "POST",
   headers: {
     "content-type": "application/json",

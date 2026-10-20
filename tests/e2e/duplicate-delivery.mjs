@@ -6,19 +6,14 @@ import {
   SendMessageCommand,
   SQSClient,
 } from "@aws-sdk/client-sqs";
+import { runtimeConfig } from "../runtime-config.mjs";
 
-const awsEndpointUrl = process.env.AWS_ENDPOINT_URL ?? "http://floci:4566";
-const awsRegion = process.env.AWS_REGION ?? "us-east-1";
-const orderProcessingQueueUrl = process.env.ORDER_PROCESSING_QUEUE_URL;
-const orderRecordsTableName = process.env.ORDER_RECORDS_TABLE_NAME;
-
-if (orderProcessingQueueUrl === undefined) {
-  throw new Error("Missing required environment variable: ORDER_PROCESSING_QUEUE_URL");
-}
-
-if (orderRecordsTableName === undefined) {
-  throw new Error("Missing required environment variable: ORDER_RECORDS_TABLE_NAME");
-}
+const {
+  awsEndpointUrl,
+  awsRegion,
+  orderProcessingQueueUrl,
+  orderRecordsTableName,
+} = runtimeConfig;
 
 const timeoutMilliseconds = 45_000;
 const pollIntervalMilliseconds = 250;

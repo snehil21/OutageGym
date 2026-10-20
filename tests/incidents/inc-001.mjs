@@ -1,14 +1,10 @@
 import assert from "node:assert/strict";
 
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { runtimeConfig } from "../runtime-config.mjs";
 
-const awsEndpointUrl = process.env.AWS_ENDPOINT_URL ?? "http://floci:4566";
-const awsRegion = process.env.AWS_REGION ?? "us-east-1";
-const orderRecordsTableName = process.env.ORDER_RECORDS_TABLE_NAME;
-
-if (orderRecordsTableName === undefined) {
-  throw new Error("Missing required environment variable: ORDER_RECORDS_TABLE_NAME");
-}
+const { awsEndpointUrl, awsRegion, orderRecordsTableName, prometheusUrl } =
+  runtimeConfig;
 
 const pause = (milliseconds) =>
   new Promise((resolve) => {
@@ -46,7 +42,7 @@ const eventually = async (check, description) => {
 const prometheusValue = async (expression) => {
   const query = new URLSearchParams({ query: expression });
   const response = await requestJson(
-    `http://prometheus:9090/api/v1/query?${query}`,
+    `${prometheusUrl}/api/v1/query?${query}`,
   );
 
   assert.equal(response.status, "success");
@@ -57,7 +53,7 @@ const prometheusValue = async (expression) => {
 
 const readAlert = async (name) => {
   const response = await requestJson(
-    "http://prometheus:9090/api/v1/rules?type=alert",
+    `${prometheusUrl}/api/v1/rules?type=alert`,
   );
   const rule = response.data.groups
     .flatMap((group) => group.rules)

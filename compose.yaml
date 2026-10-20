@@ -1,13 +1,40 @@
+x-outagegym-host-bindings:
+  floci: &floci-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${FLOCI_HOST_PORT:-4566}:4566"
+  prometheus: &prometheus-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${PROMETHEUS_HOST_PORT:-9090}:9090"
+  loki: &loki-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${LOKI_HOST_PORT:-3100}:3100"
+  otel-health: &otel-health-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${OTEL_HEALTH_HOST_PORT:-13133}:13133"
+  grafana: &grafana-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${GRAFANA_HOST_PORT:-3002}:3000"
+  order-api: &order-api-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${ORDER_API_HOST_PORT:-3000}:3000"
+
+x-outagegym-runtime:
+  aws-endpoint-url: &aws-endpoint-url http://floci:4566
+  aws-region: &aws-region us-east-1
+  aws-access-key-id: &aws-access-key-id outagegym-local
+  aws-secret-access-key: &aws-secret-access-key outagegym-local-only
+  order-api-url: &order-api-url http://order-api:3000
+  otlp-endpoint-url: &otlp-endpoint-url http://otel-collector:4318
+  prometheus-url: &prometheus-url http://prometheus:9090
+  loki-url: &loki-url http://loki:3100
+  loki-otlp-url: &loki-otlp-url http://loki:3100/otlp
+  otel-health-url: &otel-health-url http://otel-collector:13133
+  grafana-url: &grafana-url http://grafana:3000
+  order-processing-queue-url: &order-processing-queue-url http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
+  order-records-table-name: &order-records-table-name outagegym-${INCIDENT_ID:-inc-001}-order-records
+  prometheus-health-url: &prometheus-health-url http://127.0.0.1:9090/-/ready
+  grafana-health-url: &grafana-health-url http://127.0.0.1:3000/api/health
+  order-api-health-command: &order-api-health-command fetch('http://127.0.0.1:3000/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+  order-worker-health-command: &order-worker-health-command fetch('http://127.0.0.1:3001/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+
 services:
   floci:
     image: floci/floci:2.3.0
     ports:
-      - "127.0.0.1:4566:4566"
+      - *floci-host-binding
     environment:
-      FLOCI_DEFAULT_REGION: us-east-1
+      FLOCI_DEFAULT_REGION: *aws-region
       FLOCI_DEFAULT_ACCOUNT_ID: "000000000000"
       FLOCI_HOSTNAME: floci
-      FLOCI_BASE_URL: http://floci:4566
+      FLOCI_BASE_URL: *aws-endpoint-url
       FLOCI_STORAGE_MODE: memory
     networks:
       - lab
@@ -15,7 +42,7 @@ services:
   prometheus:
     image: prom/prometheus:v3.15.0
     ports:
-      - "127.0.0.1:9090:9090"
+      - *prometheus-host-binding
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
@@ -28,7 +55,7 @@ services:
         - wget
         - --quiet
         - --spider
-        - http://127.0.0.1:9090/-/ready
+        - *prometheus-health-url
       interval: 5s
       timeout: 3s
       retries: 5
@@ -39,7 +66,7 @@ services:
   loki:
     image: grafana/loki:3.7.8
     ports:
-      - "127.0.0.1:3100:3100"
+      - *loki-host-binding
     volumes:
       - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
     command:
@@ -59,13 +86,15 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.162.0
     ports:
-      - "127.0.0.1:13133:13133"
+      - *otel-health-host-binding
     expose:
       - "4317"
       - "4318"
       - "9464"
     volumes:
       - ./observability/opentelemetry/collector.yml:/etc/otelcol-contrib/config.yml:ro
+    environment:
+      LOKI_OTLP_ENDPOINT: *loki-otlp-url
     command:
       - --config=/etc/otelcol-contrib/config.yml
     depends_on:
@@ -77,7 +106,7 @@ services:
   grafana:
     image: grafana/grafana:13.2.2
     ports:
-      - "127.0.0.1:3002:3000"
+      - *grafana-host-binding
     volumes:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
@@ -86,6 +115,8 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
       GF_AUTH_DISABLE_LOGIN_FORM: "true"
       GF_USERS_DEFAULT_THEME: dark
+      PROMETHEUS_URL: *prometheus-url
+      LOKI_URL: *loki-url
     depends_on:
       prometheus:
         condition: service_healthy
@@ -97,7 +128,7 @@ services:
         - wget
         - --quiet
         - --spider
-        - http://127.0.0.1:3000/api/health
+        - *grafana-health-url
       interval: 5s
       timeout: 3s
       retries: 10
@@ -111,14 +142,14 @@ services:
       dockerfile: services/order-api/Dockerfile
     image: outagegym/order-api:local
     ports:
-      - "127.0.0.1:3000:3000"
+      - *order-api-host-binding
     environment:
       HOST: 0.0.0.0
       PORT: "3000"
-      AWS_ENDPOINT_URL: http://floci:4566
-      AWS_REGION: us-east-1
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-      ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
+      AWS_ENDPOINT_URL: *aws-endpoint-url
+      AWS_REGION: *aws-region
+      OTEL_EXPORTER_OTLP_ENDPOINT: *otlp-endpoint-url
+      ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
     depends_on:
       floci:
         condition: service_healthy
@@ -127,7 +158,7 @@ services:
         - CMD
         - node
         - -e
-        - fetch('http://127.0.0.1:3000/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+        - *order-api-health-command
       interval: 5s
       timeout: 3s
       retries: 5
@@ -141,13 +172,13 @@ services:
       dockerfile: services/order-worker/Dockerfile
     image: outagegym/order-worker:local
     environment:
-      AWS_ENDPOINT_URL: http://floci:4566
-      AWS_REGION: us-east-1
+      AWS_ENDPOINT_URL: *aws-endpoint-url
+      AWS_REGION: *aws-region
       HEALTH_HOST: 0.0.0.0
       HEALTH_PORT: "3001"
-      ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
-      ORDER_RECORDS_TABLE_NAME: outagegym-${INCIDENT_ID:-inc-001}-order-records
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
+      ORDER_RECORDS_TABLE_NAME: *order-records-table-name
+      OTEL_EXPORTER_OTLP_ENDPOINT: *otlp-endpoint-url
       SQS_RECEIVE_WAIT_TIME_SECONDS: "10"
       ORDER_STORAGE_REVISION: ${ORDER_STORAGE_REVISION:-2}
       ORDER_PROCESSING_DURATION_MS: ${ORDER_PROCESSING_DURATION_MS:-0}
@@ -164,7 +195,7 @@ services:
         - CMD
         - node
         - -e
-        - fetch('http://127.0.0.1:3001/ready').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+        - *order-worker-health-command
       interval: 5s
       timeout: 3s
       retries: 5
@@ -179,11 +210,11 @@ services:
     entrypoint:
       - aws
     environment:
-      AWS_ENDPOINT_URL: http://floci:4566
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: outagegym-local
-      AWS_SECRET_ACCESS_KEY: outagegym-local-only
+      AWS_ENDPOINT_URL: *aws-endpoint-url
+      AWS_DEFAULT_REGION: *aws-region
+      AWS_REGION: *aws-region
+      AWS_ACCESS_KEY_ID: *aws-access-key-id
+      AWS_SECRET_ACCESS_KEY: *aws-secret-access-key
       AWS_EC2_METADATA_DISABLED: "true"
       AWS_PAGER: ""
     depends_on:
@@ -200,13 +231,14 @@ services:
     volumes:
       - ./infra/terraform:/workspace
     environment:
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: outagegym-local
-      AWS_SECRET_ACCESS_KEY: outagegym-local-only
+      AWS_DEFAULT_REGION: *aws-region
+      AWS_REGION: *aws-region
+      AWS_ACCESS_KEY_ID: *aws-access-key-id
+      AWS_SECRET_ACCESS_KEY: *aws-secret-access-key
       AWS_EC2_METADATA_DISABLED: "true"
       CHECKPOINT_DISABLE: "1"
       TF_IN_AUTOMATION: "true"
+      TF_VAR_aws_endpoint_url: *aws-endpoint-url
       TF_VAR_incident_id: ${INCIDENT_ID:-inc-001}
       TF_VAR_order_processing_visibility_timeout_seconds: ${ORDER_PROCESSING_VISIBILITY_TIMEOUT_SECONDS:-30}
     depends_on:
@@ -225,11 +257,38 @@ services:
     environment:
       NPM_CONFIG_FUND: "false"
       NPM_CONFIG_UPDATE_NOTIFIER: "false"
-      ORDER_API_URL: http://order-api:3000
-      AWS_ENDPOINT_URL: http://floci:4566
-      AWS_REGION: us-east-1
-      ORDER_PROCESSING_QUEUE_URL: http://floci:4566/000000000000/outagegym-${INCIDENT_ID:-inc-001}-order-processing
-      ORDER_RECORDS_TABLE_NAME: outagegym-${INCIDENT_ID:-inc-001}-order-records
+      ORDER_API_URL: *order-api-url
+      AWS_ENDPOINT_URL: *aws-endpoint-url
+      AWS_REGION: *aws-region
+      ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
+      ORDER_RECORDS_TABLE_NAME: *order-records-table-name
+      PROMETHEUS_URL: *prometheus-url
+      LOKI_URL: *loki-url
+      OTEL_COLLECTOR_HEALTH_URL: *otel-health-url
+      GRAFANA_URL: *grafana-url
+    networks:
+      - lab
+
+  grader:
+    build:
+      context: .
+      dockerfile: grader/Dockerfile
+    image: outagegym/grader:local
+    profiles:
+      - tools
+    environment:
+      AWS_ENDPOINT_URL: *aws-endpoint-url
+      AWS_REGION: *aws-region
+      AWS_ACCESS_KEY_ID: *aws-access-key-id
+      AWS_SECRET_ACCESS_KEY: *aws-secret-access-key
+      AWS_EC2_METADATA_DISABLED: "true"
+      INCIDENT_ID: ${INCIDENT_ID:-inc-001}
+      ORDER_API_URL: *order-api-url
+      ORDER_PROCESSING_QUEUE_URL: *order-processing-queue-url
+      ORDER_RECORDS_TABLE_NAME: *order-records-table-name
+    depends_on:
+      floci:
+        condition: service_healthy
     networks:
       - lab
 
@@ -241,7 +300,7 @@ services:
     volumes:
       - ./workloads:/workloads:ro
     environment:
-      ORDER_API_URL: http://order-api:3000
+      ORDER_API_URL: *order-api-url
       INCIDENT_WORKLOAD_ARRIVAL_RATE: ${INCIDENT_WORKLOAD_ARRIVAL_RATE:-1}
       INCIDENT_WORKLOAD_DURATION_SECONDS: ${INCIDENT_WORKLOAD_DURATION_SECONDS:-10}
     depends_on:

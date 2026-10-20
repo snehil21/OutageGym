@@ -1,10 +1,8 @@
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { runtimeConfig } from "../runtime-config.mjs";
 
-const orderApiUrl = process.env.ORDER_API_URL ?? "http://order-api:3000";
-const awsEndpointUrl = process.env.AWS_ENDPOINT_URL ?? "http://floci:4566";
-const awsRegion = process.env.AWS_REGION ?? "us-east-1";
-const orderRecordsTableName =
-  process.env.ORDER_RECORDS_TABLE_NAME ?? "outagegym-inc-001-order-records";
+const { awsEndpointUrl, awsRegion, orderApiUrl, orderRecordsTableName } =
+  runtimeConfig;
 
 const expectedProductId = "product-e2e-001";
 const expectedQuantity = 3;

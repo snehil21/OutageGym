@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "outagegym-grader"
+version = "0.0.0"
+description = "Deterministic behavioural assessment for OutageGym incidents"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "boto3==1.42.97",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest==9.1.1",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "-ra",
+]
+testpaths = ["tests"]

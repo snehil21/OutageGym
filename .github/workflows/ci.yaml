@@ -13,7 +13,13 @@ jobs:
   compose:
     name: Validate healthy baseline
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      ORDER_STORAGE_REVISION: "2"
+      ORDER_WORKER_REPLICAS: "1"
+      ORDER_PROCESSING_DURATION_MS: "0"
+      BULK_ORDER_PROCESSING_DURATION_MS: "0"
+      ORDER_PROCESSING_VISIBILITY_TIMEOUT_SECONDS: "30"
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -28,21 +34,21 @@ jobs:
 
       - name: Validate Terraform
         run: |
-          docker compose -p outagegym-ci -f compose.yaml \
+          docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm terraform fmt -check -diff
-          docker compose -p outagegym-ci -f compose.yaml \
+          docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             terraform init -input=false -no-color
-          docker compose -p outagegym-ci -f compose.yaml \
+          docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             terraform validate -no-color
 
       - name: Start runtime
-        run: make start INCIDENT=ci
+        run: make start INCIDENT=inc-001
 
       - name: Verify service readiness
         run: |
@@ -51,33 +57,38 @@ jobs:
 
       - name: Verify initial healthy baseline
         run: |
-          make workload INCIDENT=ci
-          make test-e2e INCIDENT=ci
+          make workload INCIDENT=inc-001
+          make test-e2e INCIDENT=inc-001
 
       - name: Verify observability foundation
         run: |
-          docker compose -p outagegym-ci -f compose.yaml \
+          docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm node \
             node tests/observability/foundation.mjs
 
       - name: Verify first reset
         run: |
-          make reset INCIDENT=ci
-          make workload INCIDENT=ci
-          make test-e2e INCIDENT=ci
+          make reset INCIDENT=inc-001
+          make workload INCIDENT=inc-001
+          make test-e2e INCIDENT=inc-001
 
       - name: Verify second reset
         run: |
-          make reset INCIDENT=ci
-          make workload INCIDENT=ci
-          make test-e2e INCIDENT=ci
+          make reset INCIDENT=inc-001
+          make workload INCIDENT=inc-001
+          make test-e2e INCIDENT=inc-001
+
+      - name: Verify deterministic behavioural assessment
+        run: |
+          make grade INCIDENT=inc-001
+          make grade INCIDENT=inc-001
 
       - name: Stop runtime
         if: always()
-        run: make stop INCIDENT=ci
+        run: make stop INCIDENT=inc-001
 
       - name: Verify cleanup
         if: always()
         run: |
-          test -z "$(docker compose -p outagegym-ci -f compose.yaml ps --all --quiet)"
-          ! docker network inspect outagegym-ci_lab >/dev/null 2>&1
+          test -z "$(docker compose -p outagegym-inc-001 -f compose.yaml ps --all --quiet)"
+          ! docker network inspect outagegym-inc-001_lab >/dev/null 2>&1
