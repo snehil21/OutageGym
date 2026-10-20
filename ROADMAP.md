@@ -593,9 +593,9 @@ Potential technologies and failure domains:
 
 ## Current focus
 
-**Active phase:** Phase 7 closure
+**Active phase:** Phase 8 foundation ready; beta validation deferred
 
-**Next action:** Review and merge the reusable scenario framework, then begin public-beta developer experience work.
+**Next action:** Merge the developer-experience and release foundation, expand the catalogue to five scenarios, then complete native-platform and external beta validation before tagging the public beta.
 
 ## Open decisions
 
