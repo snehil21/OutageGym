@@ -22,6 +22,9 @@ make stop INCIDENT=inc-001
 
 Grafana is available at `http://127.0.0.1:3002` while OutageGym is running.
 
+To customize host-facing ports, copy `.env.example` to `.env` and change the
+values there. Service-to-service endpoints remain isolated inside Compose.
+
 `make grade` checks observable behaviour after a repair and reports the written
 rubric as `NOT REVIEWED`; it does not require one prescribed implementation.
 

@@ -3,7 +3,11 @@ import http from "k6/http";
 import { check, sleep } from "k6";
 
 const orders = JSON.parse(open("../data/orders.json"));
-const orderApiUrl = __ENV.ORDER_API_URL ?? "http://order-api:3000";
+const orderApiUrl = __ENV.ORDER_API_URL;
+
+if (!orderApiUrl) {
+  throw new Error("Missing required environment variable: ORDER_API_URL");
+}
 const arrivalRate = Number.parseInt(
   __ENV.INCIDENT_WORKLOAD_ARRIVAL_RATE ?? "2",
   10,

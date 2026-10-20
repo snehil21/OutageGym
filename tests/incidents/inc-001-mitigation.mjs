@@ -2,19 +2,15 @@ import assert from "node:assert/strict";
 
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { GetQueueAttributesCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { runtimeConfig } from "../runtime-config.mjs";
 
-const awsEndpointUrl = process.env.AWS_ENDPOINT_URL ?? "http://floci:4566";
-const awsRegion = process.env.AWS_REGION ?? "us-east-1";
-const orderProcessingQueueUrl = process.env.ORDER_PROCESSING_QUEUE_URL;
-const orderRecordsTableName = process.env.ORDER_RECORDS_TABLE_NAME;
-
-if (orderProcessingQueueUrl === undefined) {
-  throw new Error("Missing required environment variable: ORDER_PROCESSING_QUEUE_URL");
-}
-
-if (orderRecordsTableName === undefined) {
-  throw new Error("Missing required environment variable: ORDER_RECORDS_TABLE_NAME");
-}
+const {
+  awsEndpointUrl,
+  awsRegion,
+  orderProcessingQueueUrl,
+  orderRecordsTableName,
+  prometheusUrl,
+} = runtimeConfig;
 
 const pause = (milliseconds) =>
   new Promise((resolve) => {
@@ -111,7 +107,7 @@ const waitForSettledState = async () => {
 const prometheusValue = async (expression) => {
   const query = new URLSearchParams({ query: expression });
   const response = await fetch(
-    `http://prometheus:9090/api/v1/query?${query}`,
+    `${prometheusUrl}/api/v1/query?${query}`,
   );
   const body = await response.text();
 

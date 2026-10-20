@@ -1,3 +1,13 @@
+variable "aws_endpoint_url" {
+  description = "Local Floci endpoint used by the Terraform AWS provider."
+  type        = string
+
+  validation {
+    condition     = var.aws_endpoint_url == "http://floci:4566"
+    error_message = "aws_endpoint_url must target the local Floci service."
+  }
+}
+
 variable "incident_id" {
   description = "Incident identifier used to isolate OutageGym resources."
   type        = string

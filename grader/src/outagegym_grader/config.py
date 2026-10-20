@@ -33,7 +33,7 @@ def _required(environment: Mapping[str, str], name: str) -> str:
 
 
 def _incident_id(environment: Mapping[str, str]) -> str:
-    value = environment.get("INCIDENT_ID", "inc-001")
+    value = _required(environment, "INCIDENT_ID")
 
     if re.fullmatch(r"[a-z0-9-]+", value) is None:
         raise ValueError(
@@ -97,7 +97,7 @@ def load_config(
         aws_secret_access_key=secret_access_key,
         incident_id=_incident_id(environment),
         order_api_url=_local_url(
-            environment.get("ORDER_API_URL", "http://order-api:3000"),
+            _required(environment, "ORDER_API_URL"),
             "ORDER_API_URL",
             LOCAL_ORDER_API_HOSTS,
             3000,

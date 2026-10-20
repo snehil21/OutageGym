@@ -7,7 +7,7 @@ provider "aws" {
   skip_requesting_account_id  = true
 
   endpoints {
-    dynamodb = "http://floci:4566"
-    sqs      = "http://floci:4566"
+    dynamodb = var.aws_endpoint_url
+    sqs      = var.aws_endpoint_url
   }
 }

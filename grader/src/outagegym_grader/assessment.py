@@ -5,6 +5,7 @@ from botocore.client import BaseClient
 
 
 POLL_INTERVAL_SECONDS = 0.25
+ORDER_COMPLETION_TIMEOUT_SECONDS = 45
 
 
 def read_order_records(
@@ -71,7 +72,7 @@ def wait_for_completed_order(
     dynamodb: BaseClient,
     table_name: str,
     order_id: str,
-    timeout_seconds: float = 20,
+    timeout_seconds: float = ORDER_COMPLETION_TIMEOUT_SECONDS,
     *,
     settle_seconds: float = 0,
 ) -> list[dict[str, Any]]:

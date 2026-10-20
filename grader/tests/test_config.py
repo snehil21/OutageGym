@@ -81,3 +81,15 @@ def test_load_config_rejects_unsafe_incident_id() -> None:
         match="INCIDENT_ID must contain only lowercase letters",
     ):
         load_config(environment)
+
+
+@pytest.mark.parametrize("name", ["INCIDENT_ID", "ORDER_API_URL"])
+def test_load_config_requires_shared_runtime_values(name: str) -> None:
+    environment = local_environment()
+    del environment[name]
+
+    with pytest.raises(
+        ValueError,
+        match=f"Missing required environment variable: {name}",
+    ):
+        load_config(environment)
