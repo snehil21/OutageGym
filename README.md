@@ -15,15 +15,18 @@ make doctor
 make start INCIDENT=inc-001
 make status INCIDENT=inc-001
 make test-observability INCIDENT=inc-001
+make grade INCIDENT=inc-001
 make reset INCIDENT=inc-001
 make stop INCIDENT=inc-001
 ```
 
 Grafana is available at `http://127.0.0.1:3002` while OutageGym is running.
 
-`make reset` archives learner changes under `.outagegym/archives/<incident>/` before restoring the incident baseline.
+`make grade` checks observable behaviour after a repair and reports the written
+rubric as `NOT REVIEWED`; it does not require one prescribed implementation.
 
-Automated grading is planned for a later phase.
+`make reset` archives learner changes under `.outagegym/archives/<incident>/`
+before restoring the incident baseline.
 
 ## MVP
 
@@ -45,7 +48,8 @@ The local runtime will use Docker Compose, Floci, Terraform, TypeScript services
 
 ## Project status
 
-Phase 5—the first complete incident—is complete. See the [roadmap](ROADMAP.md) for verified progress.
+Phase 6—behavioural assessment and rubric support—is complete. See the
+[roadmap](ROADMAP.md) for verified progress.
 
 ## Documentation
 
