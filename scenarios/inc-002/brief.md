@@ -37,7 +37,7 @@ Completed orders exist without matching customer notification records.
 
 ## Available investigation surfaces
 
-- Grafana dashboards.
+- [Notification Delivery Overview dashboard](http://127.0.0.1:3002/d/outagegym-notification-delivery/notification-delivery-overview?from=now-15m&to=now&timezone=browser&refresh=5s).
 - Prometheus metrics.
 - Loki logs.
 - AWS CLI through the local Floci tooling.
