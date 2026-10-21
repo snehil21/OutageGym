@@ -10,6 +10,17 @@ credentials.
 The first three incidents are usable. Cross-platform beta validation is still
 in progress.
 
+## How AWS runs locally
+
+OutageGym does not connect to an AWS account. [Floci](https://floci.io/) runs
+inside Docker and emulates the AWS APIs used by the incidents. Terraform, the
+AWS CLI, and both application services target `http://floci:4566` with fixed
+fake credentials, so queues and tables are created only inside the local lab.
+
+Use the Floci UI at <http://127.0.0.1:4500> to browse those emulated SQS and
+DynamoDB resources. The UI is a separate, unprivileged Compose service; it does
+not require access to the host Docker socket.
+
 ## Requirements
 
 - macOS, Linux, or WSL 2.
@@ -50,6 +61,10 @@ operational evidence first.
 
 Open Grafana at <http://127.0.0.1:3002> and select **Dashboards → Order
 Processing Overview**.
+
+Open the Floci UI at <http://127.0.0.1:4500> to inspect the local AWS resources,
+including queues, messages, tables, and records. Start diagnosis in Grafana,
+then use Floci to confirm the underlying resource state.
 
 For logs, select **Explore → Loki → Code**. Useful LogQL queries include:
 
@@ -149,6 +164,7 @@ make reset INCIDENT=inc-001
 | Service      | Default address                       |
 | ------------ | ------------------------------------- |
 | Order API    | <http://127.0.0.1:3000>               |
+| Floci UI     | <http://127.0.0.1:4500>               |
 | Grafana      | <http://127.0.0.1:3002>               |
 | Prometheus   | <http://127.0.0.1:9090>               |
 | Loki API     | <http://127.0.0.1:3100>               |
