@@ -1,25 +1,23 @@
-import {
-  ListQueuesCommand,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
-import {
-  DynamoDBClient,
-  ListTablesCommand,
-} from "@aws-sdk/client-dynamodb";
+import { ListQueuesCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
 
 const expectedEndpoint = "http://floci:4566";
 const expectedAccessKeyId = "outagegym-local";
 const expectedSecretAccessKey = "outagegym-local-only";
 
 if (process.env.AWS_ENDPOINT_URL !== expectedEndpoint) {
-  throw new Error(`Refusing non-local AWS endpoint: ${process.env.AWS_ENDPOINT_URL}`);
+  throw new Error(
+    `Refusing non-local AWS endpoint: ${process.env.AWS_ENDPOINT_URL}`,
+  );
 }
 
 if (
   process.env.AWS_ACCESS_KEY_ID !== expectedAccessKeyId ||
   process.env.AWS_SECRET_ACCESS_KEY !== expectedSecretAccessKey
 ) {
-  throw new Error("Refusing credentials other than the OutageGym local credentials");
+  throw new Error(
+    "Refusing credentials other than the OutageGym local credentials",
+  );
 }
 
 const clientConfig = {

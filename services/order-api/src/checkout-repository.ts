@@ -28,10 +28,7 @@ export class CheckoutConflictError extends Error {
   }
 }
 
-const requiredString = (
-  value: string | undefined,
-  field: string,
-): string => {
+const requiredString = (value: string | undefined, field: string): string => {
   if (value === undefined || value === "") {
     throw new Error(`Checkout reservation is missing ${field}`);
   }

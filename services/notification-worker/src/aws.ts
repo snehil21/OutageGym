@@ -1,11 +1,6 @@
-import {
-  DescribeTableCommand,
-  DynamoDBClient,
-} from "@aws-sdk/client-dynamodb";
-import {
-  GetQueueAttributesCommand,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
+import { DescribeTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { GetQueueAttributesCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { createLocalAwsCredentials } from "@outagegym/service-core";
 
 import type { NotificationWorkerConfig } from "./config.js";
 
@@ -13,10 +8,7 @@ export const createAwsClients = (config: NotificationWorkerConfig) => {
   const clientConfig = {
     endpoint: config.awsEndpointUrl,
     region: config.awsRegion,
-    credentials: {
-      accessKeyId: "outagegym-local",
-      secretAccessKey: "outagegym-local-only",
-    },
+    credentials: createLocalAwsCredentials(),
   };
   const sqs = new SQSClient(clientConfig);
   const dynamodb = new DynamoDBClient(clientConfig);

@@ -1,8 +1,4 @@
-import {
-  createServer,
-  type Server,
-  type ServerResponse,
-} from "node:http";
+import { createServer, type Server, type ServerResponse } from "node:http";
 
 export interface HealthServerOptions {
   host: string;

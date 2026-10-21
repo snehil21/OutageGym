@@ -38,7 +38,9 @@ export const startHealthServer = async (
   return {
     close: () =>
       new Promise<void>((resolve, reject) => {
-        server.close((error) => (error === undefined ? resolve() : reject(error)));
+        server.close((error) =>
+          error === undefined ? resolve() : reject(error),
+        );
       }),
   };
 };

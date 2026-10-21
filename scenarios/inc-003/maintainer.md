@@ -39,11 +39,11 @@ changing the grader is not a complete repair.
 
 ## Deterministic states
 
-| State | Response behavior | Expected result |
-|---|---|---|
-| Broken | Selected first attempts exceed the client timeout | Retry creates another order |
-| Mitigated | Client retries are reduced or delayed | New duplicates slow, ambiguous outcomes remain |
-| Repaired | Durable request idempotency enabled | Retry returns the original accepted response |
+| State     | Response behavior                                 | Expected result                                |
+| --------- | ------------------------------------------------- | ---------------------------------------------- |
+| Broken    | Selected first attempts exceed the client timeout | Retry creates another order                    |
+| Mitigated | Client retries are reduced or delayed             | New duplicates slow, ambiguous outcomes remain |
+| Repaired  | Durable request idempotency enabled               | Retry returns the original accepted response   |
 
 Reset restores disabled checkout idempotency, the deterministic response delay,
 empty incident-scoped resources and the original learner workspace.

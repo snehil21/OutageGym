@@ -48,12 +48,13 @@ const eventually = async (check, description) => {
 
 const prometheusQuery = async (expression) => {
   const query = new URLSearchParams({ query: expression });
-  const response = await requestJson(
-    `${prometheusUrl}/api/v1/query?${query}`,
-  );
+  const response = await requestJson(`${prometheusUrl}/api/v1/query?${query}`);
 
   assert.equal(response.status, "success");
-  assert.ok(response.data.result.length > 0, `No series found for ${expression}`);
+  assert.ok(
+    response.data.result.length > 0,
+    `No series found for ${expression}`,
+  );
 
   return response.data.result;
 };
@@ -73,10 +74,7 @@ const lokiQuery = async (expression) => {
   return response.data.result;
 };
 
-assert.match(
-  await request(`${prometheusUrl}/-/ready`),
-  /ready/i,
-);
+assert.match(await request(`${prometheusUrl}/-/ready`), /ready/i);
 assert.match(await request(`${lokiUrl}/ready`), /ready/i);
 
 const collectorHealth = await requestJson(`${otelCollectorHealthUrl}/`);

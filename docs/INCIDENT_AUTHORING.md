@@ -26,15 +26,15 @@ make new-incident ID=inc-002
 
 The command creates and validates `scenarios/inc-002/`. Customize:
 
-| File | Purpose |
-|---|---|
-| `manifest.yaml` | Identity, resources, interfaces, and required outcomes |
-| `brief.md` | Learner-visible symptom, topology, objectives, and constraints |
-| `evidence.md` | Investigation worksheet |
-| `postmortem-template.md` | Written incident review |
-| `seed/data.json` | Deterministic starting data |
-| `fault-config/runtime.env` | Non-spoiling runtime configuration |
-| `hooks/*.sh` | Optional lifecycle, fault, seed, or grading behaviour |
+| File                       | Purpose                                                        |
+| -------------------------- | -------------------------------------------------------------- |
+| `manifest.yaml`            | Identity, resources, interfaces, and required outcomes         |
+| `brief.md`                 | Learner-visible symptom, topology, objectives, and constraints |
+| `evidence.md`              | Investigation worksheet                                        |
+| `postmortem-template.md`   | Written incident review                                        |
+| `seed/data.json`           | Deterministic starting data                                    |
+| `fault-config/runtime.env` | Non-spoiling runtime configuration                             |
+| `hooks/*.sh`               | Optional lifecycle, fault, seed, or grading behaviour          |
 
 The manifest must match `schemas/scenario-manifest.schema.json`, and its ID must
 match the directory name.
@@ -60,13 +60,13 @@ the grader, or routing around the intended system.
 
 Written reasoning uses this human-reviewed rubric:
 
-| Area | Points |
-|---|---:|
-| Triage and customer impact | 20 |
-| Diagnosis supported by evidence | 25 |
-| Immediate mitigation | 20 |
-| Permanent repair | 20 |
-| Postmortem | 15 |
+| Area                            | Points |
+| ------------------------------- | -----: |
+| Triage and customer impact      |     20 |
+| Diagnosis supported by evidence |     25 |
+| Immediate mitigation            |     20 |
+| Permanent repair                |     20 |
+| Postmortem                      |     15 |
 
 A complete pass requires every mandatory behavioural invariant and at least
 75/100 after human review. Automation reports written work as `NOT REVIEWED`;

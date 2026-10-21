@@ -27,6 +27,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Validate service source
+        run: |
+          make install-test-dependencies INCIDENT=inc-001
+          docker compose -p outagegym-inc-001 -f compose.yaml \
+            --profile tools run --rm node npm run format:check
+          docker compose -p outagegym-inc-001 -f compose.yaml \
+            --profile tools run --rm node npm run typecheck
+          docker compose -p outagegym-inc-001 -f compose.yaml \
+            --profile tools run --rm node npm test
+
       - name: Verify scenario framework
         run: |
           make validate-scenarios
@@ -60,9 +70,7 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/ready
 
       - name: Verify initial healthy baseline
-        run: |
-          make install-test-dependencies INCIDENT=inc-001
-          make test-e2e-current-runtime INCIDENT=inc-001
+        run: make test-e2e-current-runtime INCIDENT=inc-001
 
       - name: Verify observability foundation
         run: |

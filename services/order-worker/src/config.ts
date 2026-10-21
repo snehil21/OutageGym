@@ -1,3 +1,15 @@
+import {
+  DEFAULT_AWS_REGION,
+  DEFAULT_BIND_HOST,
+  LOCAL_AWS_HOSTS,
+  LOCAL_AWS_PORT,
+  LOCAL_OTLP_HOSTS,
+  LOCAL_OTLP_PORT,
+  readInteger,
+  readLocalUrl,
+  readRequired,
+} from "@outagegym/service-core";
+
 export interface WorkerConfig {
   awsEndpointUrl: string;
   awsRegion: string;
@@ -14,80 +26,17 @@ export interface WorkerConfig {
   receiveWaitTimeSeconds: number;
 }
 
-const localAwsHosts = new Set(["floci", "localhost", "127.0.0.1"]);
-const localOtelHosts = new Set([
-  "otel-collector",
-  "localhost",
-  "127.0.0.1",
-]);
-
-const readRequired = (env: NodeJS.ProcessEnv, name: string): string => {
-  const value = env[name];
-
-  if (value === undefined || value.trim() === "") {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-
-  return value;
-};
-
-const readInteger = (
-  env: NodeJS.ProcessEnv,
-  name: string,
-  fallback: number,
-  minimum: number,
-  maximum: number,
-): number => {
-  const value = env[name] ?? String(fallback);
-  const parsed = Number(value);
-
-  if (!Number.isInteger(parsed) || parsed < minimum || parsed > maximum) {
-    throw new Error(`${name} must be an integer from ${minimum} to ${maximum}`);
-  }
-
-  return parsed;
-};
-
-const readLocalUrl = (
-  env: NodeJS.ProcessEnv,
-  name: string,
-  allowedHosts: ReadonlySet<string>,
-  expectedPort: string,
-  serviceName: string,
-): string => {
-  const value = readRequired(env, name);
-  let url: URL;
-
-  try {
-    url = new URL(value);
-  } catch {
-    throw new Error(`${name} must be a valid URL`);
-  }
-
-  if (
-    url.protocol !== "http:" ||
-    !allowedHosts.has(url.hostname) ||
-    url.port !== expectedPort
-  ) {
-    throw new Error(
-      `${name} must target the local ${serviceName} endpoint on port ${expectedPort}`,
-    );
-  }
-
-  return value;
-};
-
 export const loadConfig = (
   env: NodeJS.ProcessEnv = process.env,
 ): WorkerConfig => ({
   awsEndpointUrl: readLocalUrl(
     env,
     "AWS_ENDPOINT_URL",
-    localAwsHosts,
-    "4566",
+    LOCAL_AWS_HOSTS,
+    LOCAL_AWS_PORT,
     "Floci",
   ),
-  awsRegion: env.AWS_REGION ?? "us-east-1",
+  awsRegion: env.AWS_REGION ?? DEFAULT_AWS_REGION,
   bulkOrderMinQuantity: readInteger(
     env,
     "BULK_ORDER_MIN_QUANTITY",
@@ -102,13 +51,13 @@ export const loadConfig = (
     0,
     600_000,
   ),
-  healthHost: env.HEALTH_HOST ?? "0.0.0.0",
+  healthHost: env.HEALTH_HOST ?? DEFAULT_BIND_HOST,
   healthPort: readInteger(env, "HEALTH_PORT", 3_001, 1, 65_535),
   orderProcessingQueueUrl: readLocalUrl(
     env,
     "ORDER_PROCESSING_QUEUE_URL",
-    localAwsHosts,
-    "4566",
+    LOCAL_AWS_HOSTS,
+    LOCAL_AWS_PORT,
     "Floci",
   ),
   orderProcessingDurationMs: readInteger(
@@ -121,18 +70,12 @@ export const loadConfig = (
   orderRecordsTableName: readRequired(env, "ORDER_RECORDS_TABLE_NAME"),
   orderCompletionEventBusName:
     env.ORDER_COMPLETION_EVENT_BUS_NAME?.trim() || undefined,
-  orderStorageRevision: readInteger(
-    env,
-    "ORDER_STORAGE_REVISION",
-    2,
-    1,
-    2,
-  ),
+  orderStorageRevision: readInteger(env, "ORDER_STORAGE_REVISION", 2, 1, 2),
   otlpEndpointUrl: readLocalUrl(
     env,
     "OTEL_EXPORTER_OTLP_ENDPOINT",
-    localOtelHosts,
-    "4318",
+    LOCAL_OTLP_HOSTS,
+    LOCAL_OTLP_PORT,
     "OpenTelemetry Collector",
   ),
   receiveWaitTimeSeconds: readInteger(

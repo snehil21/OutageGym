@@ -9,8 +9,8 @@ Write a blameless account supported by evidence from the investigation.
 ## Timeline
 
 | Time | Event and evidence |
-|---|---|
-| | |
+| ---- | ------------------ |
+|      |                    |
 
 ## Root and contributing causes
 
@@ -25,5 +25,5 @@ Write a blameless account supported by evidence from the investigation.
 ## Prevention actions
 
 | Action | Owner | Verification | Priority |
-|---|---|---|---|
-| | | | |
+| ------ | ----- | ------------ | -------- |
+|        |       |              |          |

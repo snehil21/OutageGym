@@ -41,7 +41,10 @@ const submitOrder = async () => {
 
   const body = await response.json();
 
-  assert(response.status === 202, `Expected HTTP 202, received ${response.status}`);
+  assert(
+    response.status === 202,
+    `Expected HTTP 202, received ${response.status}`,
+  );
   assert(typeof body.orderId === "string", "Response is missing orderId");
   assert(
     typeof body.correlationId === "string",
@@ -92,7 +95,10 @@ const verifyRecords = (records, response) => {
   assert(order !== undefined, "ORDER record is missing");
   assert(fulfilment !== undefined, "FULFILMENT record is missing");
   assert(order.status?.S === "COMPLETED", "Order did not reach COMPLETED");
-  assert(order.productId?.S === expectedProductId, "Product ID was not preserved");
+  assert(
+    order.productId?.S === expectedProductId,
+    "Product ID was not preserved",
+  );
   assert(
     order.quantity?.N === String(expectedQuantity),
     "Order quantity was not preserved",

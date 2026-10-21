@@ -1,3 +1,5 @@
+import { createTelemetry, describeError } from "@outagegym/service-core";
+
 import { buildApp } from "./app.js";
 import { createCheckoutFault } from "./checkout-fault.js";
 import { reserveCheckout } from "./checkout-repository.js";
@@ -5,7 +7,6 @@ import { loadConfig } from "./config.js";
 import { checkTableReady, createDynamoDbClient } from "./dynamodb.js";
 import { publishOrder } from "./order-publisher.js";
 import { checkQueueReady, createSqsClient } from "./sqs.js";
-import { createTelemetry } from "./telemetry.js";
 
 const config = loadConfig();
 const sqs = createSqsClient(config);
@@ -39,31 +40,29 @@ const app = buildApp({
     result,
   }) => {
     checkoutCount.add(1, { result });
-    telemetry.logger.emit({
-      body: result === "created" ? "Order accepted" : "Checkout replayed",
-      severityText: "INFO",
-      attributes: {
+    telemetry.logger.info(
+      result === "created" ? "order_accepted" : "checkout_replayed",
+      result === "created" ? "Order accepted" : "Checkout replayed",
+      {
         correlationId,
-        event: result === "created" ? "order_accepted" : "checkout_replayed",
         idempotencyKey,
         messageId,
         orderId,
         result,
       },
-    });
+    );
   },
   recordSlowCheckout: ({ correlationId, idempotencyKey, orderId }) => {
     slowCheckoutCount.add(1);
-    telemetry.logger.emit({
-      body: "Checkout response exceeded the service target",
-      severityText: "WARN",
-      attributes: {
+    telemetry.logger.warn(
+      "checkout_response_slow",
+      "Checkout response exceeded the service target",
+      {
         correlationId,
-        event: "checkout_response_slow",
         idempotencyKey,
         orderId,
       },
-    });
+    );
   },
   reserveCheckout: (input) =>
     config.checkoutIdempotencyEnabled
@@ -72,7 +71,7 @@ const app = buildApp({
 });
 
 const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
-  app.log.info({ signal }, "Shutdown requested");
+  telemetry.logger.info("shutdown_requested", "Shutdown requested", { signal });
 
   try {
     await app.close();
@@ -88,14 +87,13 @@ process.once("SIGTERM", () => void shutdown("SIGTERM"));
 
 try {
   await app.listen({ host: config.host, port: config.port });
-  telemetry.logger.emit({
-    body: "Order API started",
-    attributes: {
-      event: "service_started",
-    },
-  });
+  telemetry.logger.info("service_started", "Order API started");
 } catch (error) {
-  app.log.error(error, "Order API failed to start");
+  telemetry.logger.error(
+    "service_start_failed",
+    "Order API failed to start",
+    describeError(error),
+  );
   sqs.destroy();
   dynamodb.destroy();
   await telemetry.shutdown();

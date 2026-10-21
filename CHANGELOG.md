@@ -4,6 +4,8 @@ Notable changes to OutageGym are recorded here.
 
 ## Unreleased
 
+- Added shared service configuration, structured logging, telemetry, formatting,
+  and workspace validation foundations.
 - Added three deterministic incidents covering order-processing failures,
   missing notifications, and intermittent checkout failures.
 - Added behavioural grading, restart-durability checks, learner-work archiving,

@@ -82,11 +82,7 @@
       ],
       "properties": {
         "level": {
-          "enum": [
-            "beginner",
-            "intermediate",
-            "advanced"
-          ]
+          "enum": ["beginner", "intermediate", "advanced"]
         },
         "interacting_causes": {
           "type": "integer",
@@ -114,19 +110,12 @@
     "resources": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "minimum_host",
-        "required_services"
-      ],
+      "required": ["minimum_host", "required_services"],
       "properties": {
         "minimum_host": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "logical_cpu_cores",
-            "memory_gb",
-            "free_disk_gb"
-          ],
+          "required": ["logical_cpu_cores", "memory_gb", "free_disk_gb"],
           "properties": {
             "logical_cpu_cores": {
               "type": "integer",
@@ -155,11 +144,7 @@
     "documents": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "brief",
-        "evidence",
-        "postmortem"
-      ],
+      "required": ["brief", "evidence", "postmortem"],
       "properties": {
         "brief": {
           "$ref": "#/$defs/relative_file"
@@ -175,12 +160,7 @@
     "system": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "entrypoint",
-        "processing_service",
-        "queue",
-        "store"
-      ],
+      "required": ["entrypoint", "processing_service", "queue", "store"],
       "properties": {
         "entrypoint": {
           "$ref": "#/$defs/component_name"
@@ -199,13 +179,7 @@
     "commands": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "start",
-        "status",
-        "workload",
-        "reset",
-        "stop"
-      ],
+      "required": ["start", "status", "workload", "reset", "stop"],
       "properties": {
         "start": {
           "type": "string",
@@ -232,11 +206,7 @@
     "investigation": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "grafana_url",
-        "prometheus_url",
-        "loki_url"
-      ],
+      "required": ["grafana_url", "prometheus_url", "loki_url"],
       "properties": {
         "grafana_url": {
           "type": "string",
@@ -255,17 +225,10 @@
     "initial_signal": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "type",
-        "name",
-        "condition"
-      ],
+      "required": ["type", "name", "condition"],
       "properties": {
         "type": {
-          "enum": [
-            "alert",
-            "customer_report"
-          ]
+          "enum": ["alert", "customer_report"]
         },
         "name": {
           "type": "string",

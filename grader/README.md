@@ -26,13 +26,13 @@ Written reasoning is always reported as `NOT REVIEWED` by automation.
 
 Use the project-wide 100-point rubric for self-review or peer review:
 
-| Area | Points |
-|---|---:|
-| Triage and customer impact | 20 |
-| Diagnosis supported by evidence | 25 |
-| Immediate mitigation | 20 |
-| Permanent repair | 20 |
-| Postmortem | 15 |
+| Area                            | Points |
+| ------------------------------- | -----: |
+| Triage and customer impact      |     20 |
+| Diagnosis supported by evidence |     25 |
+| Immediate mitigation            |     20 |
+| Permanent repair                |     20 |
+| Postmortem                      |     15 |
 
 Reviewers should cite evidence from the worksheet and postmortem for every
 score. A future AI-assisted review may offer suggestions, but it must remain

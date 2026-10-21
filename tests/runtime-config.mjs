@@ -43,11 +43,7 @@ export const runtimeConfig = Object.freeze({
     new Set(["grafana", ...loopbackHosts]),
     "3000",
   ),
-  lokiUrl: localUrl(
-    "LOKI_URL",
-    new Set(["loki", ...loopbackHosts]),
-    "3100",
-  ),
+  lokiUrl: localUrl("LOKI_URL", new Set(["loki", ...loopbackHosts]), "3100"),
   orderApiUrl: localUrl(
     "ORDER_API_URL",
     new Set(["order-api", ...loopbackHosts]),

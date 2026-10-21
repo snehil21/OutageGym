@@ -106,9 +106,7 @@ const waitForSettledState = async () => {
 
 const prometheusValue = async (expression) => {
   const query = new URLSearchParams({ query: expression });
-  const response = await fetch(
-    `${prometheusUrl}/api/v1/query?${query}`,
-  );
+  const response = await fetch(`${prometheusUrl}/api/v1/query?${query}`);
   const body = await response.text();
 
   assert.equal(

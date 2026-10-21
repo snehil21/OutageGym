@@ -11,8 +11,8 @@ Write from a blameless, systems-focused perspective. Support conclusions with ev
 ## Timeline
 
 | Time | Event and evidence |
-|---|---|
-| | |
+| ---- | ------------------ |
+|      |                    |
 
 ## Root cause
 
@@ -33,5 +33,5 @@ Write from a blameless, systems-focused perspective. Support conclusions with ev
 ## Prevention actions
 
 | Action | Owner | Verification | Priority |
-|---|---|---|---|
-| | | | |
+| ------ | ----- | ------------ | -------- |
+|        |       |              |          |
