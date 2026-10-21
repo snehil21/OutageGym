@@ -1,5 +1,6 @@
 x-outagegym-host-bindings:
   floci: &floci-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${FLOCI_HOST_PORT:-4566}:4566"
+  floci-ui: &floci-ui-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${FLOCI_UI_HOST_PORT:-4500}:4500"
   prometheus: &prometheus-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${PROMETHEUS_HOST_PORT:-9090}:9090"
   loki: &loki-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${LOKI_HOST_PORT:-3100}:3100"
   otel-health: &otel-health-host-binding "${OUTAGEGYM_BIND_ADDRESS:-127.0.0.1}:${OTEL_HEALTH_HOST_PORT:-13133}:13133"
@@ -41,6 +42,22 @@ services:
       FLOCI_HOSTNAME: floci
       FLOCI_BASE_URL: *aws-endpoint-url
       FLOCI_STORAGE_MODE: memory
+    networks:
+      - lab
+
+  floci-ui:
+    image: floci/floci-ui:0.7.0
+    ports:
+      - *floci-ui-host-binding
+    environment:
+      FLOCI_ENDPOINT: *aws-endpoint-url
+      FLOCI_DEFAULT_ACCOUNT_ID: "000000000000"
+      AWS_REGION: *aws-region
+      AWS_ACCESS_KEY_ID: *aws-access-key-id
+      AWS_SECRET_ACCESS_KEY: *aws-secret-access-key
+    depends_on:
+      floci:
+        condition: service_healthy
     networks:
       - lab
 
