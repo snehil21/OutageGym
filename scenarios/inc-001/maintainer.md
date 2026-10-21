@@ -38,11 +38,11 @@ telemetry, or relying only on a longer visibility timeout is not a valid repair.
 
 ## Validated states
 
-| State | Visibility | Storage revision | Workers | Expected result |
-|---|---:|---:|---:|---|
-| Broken | 2 seconds | 1 | 2 | Backlog, retries, duplicates, and alerts |
-| Mitigated | 10 seconds | 1 | 2 | Duplicates stop; backlog remains |
-| Repaired | 10 seconds | 2 | 5 | All required outcomes pass |
+| State     | Visibility | Storage revision | Workers | Expected result                          |
+| --------- | ---------: | ---------------: | ------: | ---------------------------------------- |
+| Broken    |  2 seconds |                1 |       2 | Backlog, retries, duplicates, and alerts |
+| Mitigated | 10 seconds |                1 |       2 | Duplicates stop; backlog remains         |
+| Repaired  | 10 seconds |                2 |       5 | All required outcomes pass               |
 
 Reset must restore the broken state, empty scenario resources, deterministic
 data and timing, and the original learner workspace without silently discarding

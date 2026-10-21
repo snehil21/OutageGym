@@ -48,11 +48,11 @@ telemetry, or replaying every order without an idempotency guard is invalid.
 
 ## Deterministic states
 
-| State | Routed channels | Expected result |
-|---|---|---|
-| Broken | `EMAIL` | Email succeeds; SMS is missing |
-| Mitigated | `EMAIL`, `SMS` plus targeted replay | All supplied orders recover |
-| Repaired | Config-managed `EMAIL`, `SMS` | New and replayed events remain correct |
+| State     | Routed channels                     | Expected result                        |
+| --------- | ----------------------------------- | -------------------------------------- |
+| Broken    | `EMAIL`                             | Email succeeds; SMS is missing         |
+| Mitigated | `EMAIL`, `SMS` plus targeted replay | All supplied orders recover            |
+| Repaired  | Config-managed `EMAIL`, `SMS`       | New and replayed events remain correct |
 
 Reset must restore the incomplete rule, empty scenario resources, deterministic
 seed data, and the original learner workspace.

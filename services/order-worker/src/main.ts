@@ -1,4 +1,9 @@
 import type { ObservableCallback } from "@opentelemetry/api";
+import {
+  createStructuredLogger,
+  createTelemetry,
+  describeError,
+} from "@outagegym/service-core";
 
 import {
   checkAwsResourcesReady,
@@ -9,39 +14,10 @@ import { loadConfig } from "./config.js";
 import { startHealthServer } from "./health-server.js";
 import { processOrderMessage } from "./message-processor.js";
 import { publishOrderCompleted } from "./order-event-publisher.js";
-import {
-  completeOrder,
-  recordOrderProcessing,
-} from "./order-repository.js";
+import { completeOrder, recordOrderProcessing } from "./order-repository.js";
 import { consumeNextMessage } from "./queue-consumer.js";
-import { createTelemetry } from "./telemetry.js";
 
-type LogLevel = "error" | "info";
-
-const log = (
-  level: LogLevel,
-  event: string,
-  fields: Record<string, unknown> = {},
-): void => {
-  const line = JSON.stringify({
-    level,
-    time: new Date().toISOString(),
-    service: "order-worker",
-    event,
-    ...fields,
-  });
-
-  if (level === "error") {
-    console.error(line);
-  } else {
-    console.log(line);
-  }
-};
-
-const describeError = (error: unknown): Record<string, unknown> =>
-  error instanceof Error
-    ? { errorName: error.name, errorMessage: error.message }
-    : { errorMessage: String(error) };
+const bootstrapLogger = createStructuredLogger("order-worker");
 
 const pause = async (milliseconds: number): Promise<void> =>
   new Promise((resolve) => {
@@ -65,16 +41,7 @@ const runWorker = async (): Promise<void> => {
       unit: "s",
       advice: {
         explicitBucketBoundaries: [
-          0.005,
-          0.01,
-          0.025,
-          0.05,
-          0.1,
-          0.25,
-          0.5,
-          1,
-          2.5,
-          5,
+          0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5,
         ],
       },
     },
@@ -120,7 +87,11 @@ const runWorker = async (): Promise<void> => {
       observation.observe(depth.delayed, { state: "delayed" });
       observation.observe(depth.inFlight, { state: "in_flight" });
     } catch (error) {
-      log("error", "queue_metrics_collection_failed", describeError(error));
+      telemetry.logger.error(
+        "queue_metrics_collection_failed",
+        "Queue metrics collection failed",
+        describeError(error),
+      );
     }
   };
   queueMessages.addCallback(observeQueueDepth);
@@ -143,7 +114,9 @@ const runWorker = async (): Promise<void> => {
     }
 
     stopping = true;
-    log("info", "shutdown_requested", { signal });
+    telemetry.logger.info("shutdown_requested", "Shutdown requested", {
+      signal,
+    });
     abortController.abort();
   };
 
@@ -153,18 +126,9 @@ const runWorker = async (): Promise<void> => {
   process.once("SIGINT", onSigint);
   process.once("SIGTERM", onSigterm);
 
-  log("info", "worker_started", {
+  telemetry.logger.info("worker_started", "Order worker started", {
     queueUrl: config.orderProcessingQueueUrl,
     tableName: config.orderRecordsTableName,
-  });
-  telemetry.logger.emit({
-    body: "Order worker started",
-    severityText: "INFO",
-    attributes: {
-      event: "worker_started",
-      queueUrl: config.orderProcessingQueueUrl,
-      tableName: config.orderRecordsTableName,
-    },
   });
 
   try {
@@ -211,11 +175,7 @@ const runWorker = async (): Promise<void> => {
 
                   await pause(duration);
                 },
-                recordOrderProcessing: (
-                  message,
-                  startedAt,
-                  storageRevision,
-                ) =>
+                recordOrderProcessing: (message, startedAt, storageRevision) =>
                   recordOrderProcessing(
                     clients.dynamodb,
                     config.orderRecordsTableName,
@@ -244,7 +204,9 @@ const runWorker = async (): Promise<void> => {
         );
 
         if (result !== undefined) {
-          log("info", "order_processed", { ...result });
+          telemetry.logger.info("order_processed", "Order processed", {
+            ...result,
+          });
           processingCount.add(1, { result: result.result });
 
           if (result.receiveCount > 1) {
@@ -260,39 +222,18 @@ const runWorker = async (): Promise<void> => {
               channel: result.notificationChannel,
             });
           }
-
-          telemetry.logger.emit({
-            body: "Order processed",
-            severityText: "INFO",
-            attributes: {
-              correlationId: result.correlationId,
-              completionEventId: result.completionEventId,
-              event: "order_processed",
-              messageId: result.messageId,
-              orderId: result.orderId,
-              notificationChannel: result.notificationChannel,
-              receiveCount: result.receiveCount,
-              result: result.result,
-            },
-          });
         }
       } catch (error) {
         if (stopping) {
           break;
         }
 
-        log("error", "message_processing_failed", describeError(error));
+        telemetry.logger.error(
+          "message_processing_failed",
+          "Message processing failed",
+          describeError(error),
+        );
         failureCount.add(1);
-        telemetry.logger.emit({
-          body: "Message processing failed",
-          severityText: "ERROR",
-          attributes: {
-            errorMessage:
-              error instanceof Error ? error.message : String(error),
-            errorName: error instanceof Error ? error.name : "UnknownError",
-            event: "message_processing_failed",
-          },
-        });
         await pause(1_000);
       }
     }
@@ -302,14 +243,7 @@ const runWorker = async (): Promise<void> => {
     queueMessages.removeCallback(observeQueueDepth);
     await healthServer.close();
     clients.destroy();
-    log("info", "worker_stopped");
-    telemetry.logger.emit({
-      body: "Order worker stopped",
-      severityText: "INFO",
-      attributes: {
-        event: "worker_stopped",
-      },
-    });
+    telemetry.logger.info("worker_stopped", "Order worker stopped");
     await telemetry.shutdown();
   }
 };
@@ -317,6 +251,10 @@ const runWorker = async (): Promise<void> => {
 try {
   await runWorker();
 } catch (error) {
-  log("error", "worker_failed", describeError(error));
+  bootstrapLogger.error(
+    "worker_failed",
+    "Order worker failed",
+    describeError(error),
+  );
   process.exitCode = 1;
 }

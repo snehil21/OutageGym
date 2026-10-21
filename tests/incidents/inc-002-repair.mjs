@@ -76,16 +76,17 @@ try {
     "Routing rule must include both supported notification channels",
   );
 
-  const completedOrders = (
-    await dynamodb.send(
-      new ScanCommand({
-        TableName: runtimeConfig.orderRecordsTableName,
-        ConsistentRead: true,
-      }),
-    )
-  ).Items?.filter(
-    (item) => item.recordId?.S === "ORDER" && item.status?.S === "COMPLETED",
-  ) ?? [];
+  const completedOrders =
+    (
+      await dynamodb.send(
+        new ScanCommand({
+          TableName: runtimeConfig.orderRecordsTableName,
+          ConsistentRead: true,
+        }),
+      )
+    ).Items?.filter(
+      (item) => item.recordId?.S === "ORDER" && item.status?.S === "COMPLETED",
+    ) ?? [];
   await Promise.all(
     completedOrders.map((item) =>
       waitForNotification(

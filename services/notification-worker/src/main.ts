@@ -1,5 +1,10 @@
 import type { ObservableCallback } from "@opentelemetry/api";
 import {
+  createStructuredLogger,
+  createTelemetry,
+  describeError,
+} from "@outagegym/service-core";
+import {
   DeleteMessageCommand,
   ReceiveMessageCommand,
 } from "@aws-sdk/client-sqs";
@@ -9,24 +14,8 @@ import { loadConfig } from "./config.js";
 import { startHealthServer } from "./health-server.js";
 import { parseNotificationMessage } from "./notification-message.js";
 import { recordNotification } from "./notification-repository.js";
-import { createTelemetry } from "./telemetry.js";
 
-const log = (event: string, fields: Record<string, unknown> = {}): void => {
-  console.log(
-    JSON.stringify({
-      level: "info",
-      time: new Date().toISOString(),
-      service: "notification-worker",
-      event,
-      ...fields,
-    }),
-  );
-};
-
-const describeError = (error: unknown): Record<string, unknown> =>
-  error instanceof Error
-    ? { errorName: error.name, errorMessage: error.message }
-    : { errorMessage: String(error) };
+const bootstrapLogger = createStructuredLogger("notification-worker");
 
 const pause = async (milliseconds: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -34,7 +23,10 @@ const pause = async (milliseconds: number): Promise<void> =>
 const run = async (): Promise<void> => {
   const config = loadConfig();
   const clients = createAwsClients(config);
-  const telemetry = createTelemetry(config.otlpEndpointUrl);
+  const telemetry = createTelemetry(
+    config.otlpEndpointUrl,
+    "notification-worker",
+  );
   const processingCount = telemetry.meter.createCounter(
     "outagegym.notification.processing.count",
     { description: "Notification messages handled by result and channel" },
@@ -49,7 +41,11 @@ const run = async (): Promise<void> => {
         await readQueueDepth(clients.sqs, config.notificationQueueUrl),
       );
     } catch (error) {
-      log("queue_metrics_collection_failed", describeError(error));
+      telemetry.logger.error(
+        "queue_metrics_collection_failed",
+        "Queue metrics collection failed",
+        describeError(error),
+      );
     }
   };
   queueMessages.addCallback(observeQueue);
@@ -70,13 +66,15 @@ const run = async (): Promise<void> => {
   const stop = (signal: NodeJS.Signals): void => {
     if (!stopping) {
       stopping = true;
-      log("shutdown_requested", { signal });
+      telemetry.logger.info("shutdown_requested", "Shutdown requested", {
+        signal,
+      });
       abortController.abort();
     }
   };
   process.once("SIGINT", () => stop("SIGINT"));
   process.once("SIGTERM", () => stop("SIGTERM"));
-  log("worker_started", {
+  telemetry.logger.info("worker_started", "Notification worker started", {
     queueUrl: config.notificationQueueUrl,
     tableName: config.notificationRecordsTableName,
   });
@@ -93,7 +91,10 @@ const run = async (): Promise<void> => {
           { abortSignal: abortController.signal },
         );
         const delivery = response.Messages?.[0];
-        if (delivery?.Body === undefined || delivery.ReceiptHandle === undefined) {
+        if (
+          delivery?.Body === undefined ||
+          delivery.ReceiptHandle === undefined
+        ) {
           continue;
         }
 
@@ -117,19 +118,22 @@ const run = async (): Promise<void> => {
           messageId: delivery.MessageId,
           result,
         };
-        log("notification_processed", fields);
-        telemetry.logger.emit({
-          body: "Notification processed",
-          severityText: "INFO",
-          attributes: { event: "notification_processed", ...fields },
-        });
+        telemetry.logger.info(
+          "notification_processed",
+          "Notification processed",
+          fields,
+        );
         processingCount.add(1, {
           result,
           channel: message.notificationChannel,
         });
       } catch (error) {
         if (!stopping) {
-          log("notification_processing_failed", describeError(error));
+          telemetry.logger.error(
+            "notification_processing_failed",
+            "Notification processing failed",
+            describeError(error),
+          );
           await pause(1_000);
         }
       }
@@ -139,8 +143,17 @@ const run = async (): Promise<void> => {
     await health.close();
     clients.destroy();
     await telemetry.shutdown();
-    log("worker_stopped");
+    telemetry.logger.info("worker_stopped", "Notification worker stopped");
   }
 };
 
-await run();
+try {
+  await run();
+} catch (error) {
+  bootstrapLogger.error(
+    "worker_failed",
+    "Notification worker failed",
+    describeError(error),
+  );
+  process.exitCode = 1;
+}

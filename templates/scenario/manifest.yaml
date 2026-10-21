@@ -1,5 +1,5 @@
 schema_version: 1
-id: {{INCIDENT_ID}}
+id: { { INCIDENT_ID } }
 title: Describe the customer-visible symptom
 difficulty:
   level: beginner

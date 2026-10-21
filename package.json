@@ -6,7 +6,18 @@
   "engines": {
     "node": "22.x"
   },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run build --workspace @outagegym/service-core && npm run typecheck --workspaces --if-present"
+  },
   "workspaces": [
+    "packages/*",
     "services/*"
-  ]
+  ],
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
 }

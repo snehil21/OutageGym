@@ -13,9 +13,9 @@
 Record at least two hypotheses before making a change.
 
 | Hypothesis | Supporting evidence | Rejecting evidence | Conclusion |
-|---|---|---|---|
-| | | | |
-| | | | |
+| ---------- | ------------------- | ------------------ | ---------- |
+|            |                     |                    |            |
+|            |                     |                    |            |
 
 ## Diagnosis
 

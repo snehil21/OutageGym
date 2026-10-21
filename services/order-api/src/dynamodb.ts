@@ -1,22 +1,15 @@
-import {
-  DescribeTableCommand,
-  DynamoDBClient,
-} from "@aws-sdk/client-dynamodb";
+import { DescribeTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { createLocalAwsCredentials } from "@outagegym/service-core";
 
 import type { AppConfig } from "./config.js";
 
 type DynamoDbConfig = Pick<AppConfig, "awsEndpointUrl" | "awsRegion">;
 
-export const createDynamoDbClient = (
-  config: DynamoDbConfig,
-): DynamoDBClient =>
+export const createDynamoDbClient = (config: DynamoDbConfig): DynamoDBClient =>
   new DynamoDBClient({
     endpoint: config.awsEndpointUrl,
     region: config.awsRegion,
-    credentials: {
-      accessKeyId: "outagegym-local",
-      secretAccessKey: "outagegym-local-only",
-    },
+    credentials: createLocalAwsCredentials(),
   });
 
 export const checkTableReady = async (

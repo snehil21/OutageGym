@@ -74,7 +74,9 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
   }
 
   if (productId.length > 100) {
-    throw new Error("Order message field productId must not exceed 100 characters");
+    throw new Error(
+      "Order message field productId must not exceed 100 characters",
+    );
   }
 
   if (
@@ -83,7 +85,9 @@ export const parseOrderMessage = (body: string | undefined): OrderMessage => {
     quantity < 1 ||
     quantity > 100
   ) {
-    throw new Error("Order message field quantity must be an integer from 1 to 100");
+    throw new Error(
+      "Order message field quantity must be an integer from 1 to 100",
+    );
   }
 
   if (notificationChannel !== "EMAIL" && notificationChannel !== "SMS") {

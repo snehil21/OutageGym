@@ -1,12 +1,7 @@
-import {
-  DescribeTableCommand,
-  DynamoDBClient,
-} from "@aws-sdk/client-dynamodb";
+import { DescribeTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
-import {
-  GetQueueAttributesCommand,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
+import { GetQueueAttributesCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { createLocalAwsCredentials } from "@outagegym/service-core";
 
 import type { WorkerConfig } from "./config.js";
 
@@ -29,10 +24,7 @@ export const createAwsClients = (config: AwsConfig): AwsClients => {
   const clientConfig = {
     endpoint: config.awsEndpointUrl,
     region: config.awsRegion,
-    credentials: {
-      accessKeyId: "outagegym-local",
-      secretAccessKey: "outagegym-local-only",
-    },
+    credentials: createLocalAwsCredentials(),
   };
 
   const sqs = new SQSClient(clientConfig);
@@ -71,7 +63,9 @@ export const checkAwsResourcesReady = async (
   ]);
 
   if (table.Table?.TableStatus !== "ACTIVE") {
-    throw new Error(`Order records table is not active: ${table.Table?.TableStatus}`);
+    throw new Error(
+      `Order records table is not active: ${table.Table?.TableStatus}`,
+    );
   }
 };
 

@@ -19,7 +19,11 @@ const pause = (milliseconds) =>
 const requestJson = async (url) => {
   const response = await fetch(url);
   const body = await response.text();
-  assert.equal(response.ok, true, `${url} returned ${response.status}: ${body}`);
+  assert.equal(
+    response.ok,
+    true,
+    `${url} returned ${response.status}: ${body}`,
+  );
   return JSON.parse(body);
 };
 

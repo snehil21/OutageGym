@@ -103,14 +103,16 @@ try {
 
   await pause(3_000);
   const records = await eventually(async () => {
-    const items = (
-      await dynamodb.send(
-        new ScanCommand({
-          TableName: runtimeConfig.orderRecordsTableName,
-          ConsistentRead: true,
-        }),
-      )
-    ).Items?.filter((item) => item.idempotencyKey?.S === idempotencyKey) ?? [];
+    const items =
+      (
+        await dynamodb.send(
+          new ScanCommand({
+            TableName: runtimeConfig.orderRecordsTableName,
+            ConsistentRead: true,
+          }),
+        )
+      ).Items?.filter((item) => item.idempotencyKey?.S === idempotencyKey) ??
+      [];
 
     assert.ok(
       items.some((item) => item.recordId?.S === "ORDER"),

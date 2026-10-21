@@ -49,12 +49,12 @@ make reset INCIDENT=inc-001
 
 ## Local endpoints
 
-| Service | Default address |
-|---|---|
-| Order API | <http://127.0.0.1:3000> |
-| Grafana | <http://127.0.0.1:3002> |
-| Prometheus | <http://127.0.0.1:9090> |
-| Loki API | <http://127.0.0.1:3100> |
+| Service            | Default address         |
+| ------------------ | ----------------------- |
+| Order API          | <http://127.0.0.1:3000> |
+| Grafana            | <http://127.0.0.1:3002> |
+| Prometheus         | <http://127.0.0.1:9090> |
+| Loki API           | <http://127.0.0.1:3100> |
 | Floci AWS emulator | <http://127.0.0.1:4566> |
 
 To change host-facing addresses, copy `.env.example` to `.env` and edit the

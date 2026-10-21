@@ -11,9 +11,9 @@
 ## Initial hypotheses
 
 | Hypothesis | Supporting evidence | Rejecting evidence | Conclusion |
-|---|---|---|---|
-| | | | |
-| | | | |
+| ---------- | ------------------- | ------------------ | ---------- |
+|            |                     |                    |            |
+|            |                     |                    |            |
 
 ## Diagnosis
 

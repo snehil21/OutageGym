@@ -1,7 +1,5 @@
-import {
-  GetQueueAttributesCommand,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
+import { GetQueueAttributesCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { createLocalAwsCredentials } from "@outagegym/service-core";
 
 import type { AppConfig } from "./config.js";
 
@@ -11,10 +9,7 @@ export const createSqsClient = (config: SqsConfig): SQSClient =>
   new SQSClient({
     endpoint: config.awsEndpointUrl,
     region: config.awsRegion,
-    credentials: {
-      accessKeyId: "outagegym-local",
-      secretAccessKey: "outagegym-local-only",
-    },
+    credentials: createLocalAwsCredentials(),
   });
 
 export const checkQueueReady = async (

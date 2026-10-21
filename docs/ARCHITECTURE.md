@@ -57,18 +57,18 @@ fault logic.
 
 ## Runtime responsibilities
 
-| Component | Responsibility |
-|---|---|
-| Docker Compose | Runs and networks all local services |
-| Floci | Emulates SQS and DynamoDB |
-| Terraform | Creates scenario infrastructure in Floci |
-| Order API and worker | Provide the system under investigation |
-| OpenTelemetry Collector | Receives and routes application telemetry |
-| Prometheus | Stores metrics and evaluates alerts |
-| Loki | Stores searchable logs |
-| Grafana | Presents dashboards and investigation views |
-| k6 | Produces repeatable workload traffic |
-| Grader | Verifies repaired behaviour from observable outcomes |
+| Component               | Responsibility                                       |
+| ----------------------- | ---------------------------------------------------- |
+| Docker Compose          | Runs and networks all local services                 |
+| Floci                   | Emulates SQS and DynamoDB                            |
+| Terraform               | Creates scenario infrastructure in Floci             |
+| Order API and worker    | Provide the system under investigation               |
+| OpenTelemetry Collector | Receives and routes application telemetry            |
+| Prometheus              | Stores metrics and evaluates alerts                  |
+| Loki                    | Stores searchable logs                               |
+| Grafana                 | Presents dashboards and investigation views          |
+| k6                      | Produces repeatable workload traffic                 |
+| Grader                  | Verifies repaired behaviour from observable outcomes |
 
 ## Isolation and safety
 

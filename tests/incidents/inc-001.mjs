@@ -41,12 +41,13 @@ const eventually = async (check, description) => {
 
 const prometheusValue = async (expression) => {
   const query = new URLSearchParams({ query: expression });
-  const response = await requestJson(
-    `${prometheusUrl}/api/v1/query?${query}`,
-  );
+  const response = await requestJson(`${prometheusUrl}/api/v1/query?${query}`);
 
   assert.equal(response.status, "success");
-  assert.ok(response.data.result.length > 0, `No series found for ${expression}`);
+  assert.ok(
+    response.data.result.length > 0,
+    `No series found for ${expression}`,
+  );
 
   return Number(response.data.result[0].value[1]);
 };

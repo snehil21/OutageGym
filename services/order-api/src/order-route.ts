@@ -48,8 +48,7 @@ export const registerOrderRoute = (
     Body: CreateOrderRequest;
     Headers: { "idempotency-key"?: string };
     Reply:
-      | CreateOrderResponse
-      | { error: "idempotency_conflict"; message: string };
+      CreateOrderResponse | { error: "idempotency_conflict"; message: string };
   }>(
     "/orders",
     {

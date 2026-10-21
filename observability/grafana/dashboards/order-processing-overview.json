@@ -251,10 +251,7 @@
   ],
   "refresh": "5s",
   "schemaVersion": 42,
-  "tags": [
-    "outagegym",
-    "orders"
-  ],
+  "tags": ["outagegym", "orders"],
   "templating": {
     "list": []
   },
