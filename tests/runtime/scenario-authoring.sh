@@ -42,7 +42,7 @@ docker run --rm --network none \
   -v "$fixture_root/workspace:/workspace:ro" \
   outagegym/scenario-validator:local inc-999 >/dev/null
 
-sed 's/^id: inc-999$/id: invalid/' \
+sed 's/^id:.*$/id: invalid/' \
   "$scenarios_root/inc-999/manifest.yaml" \
   >"$scenarios_root/inc-999/manifest.yaml.invalid"
 mv "$scenarios_root/inc-999/manifest.yaml.invalid" \
