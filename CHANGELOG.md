@@ -4,6 +4,10 @@ Notable changes to OutageGym are recorded here.
 
 ## Unreleased
 
+- Added an INC-003 checkout reliability dashboard and regression coverage for
+  every provisioned Grafana dashboard.
+- Stabilized INC-003 alert verification by allowing Prometheus to complete its
+  configured evaluation period.
 - Added shared service configuration, structured logging, telemetry, formatting,
   and workspace validation foundations.
 - Added three deterministic incidents covering order-processing failures,

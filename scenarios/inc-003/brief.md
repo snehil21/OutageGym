@@ -27,7 +27,7 @@ Checkout latency is elevated and some customer retries produce multiple orders.
 
 ## Available investigation surfaces
 
-- Grafana dashboards.
+- [Checkout Reliability Overview dashboard](http://127.0.0.1:3002/d/outagegym-checkout-reliability/checkout-reliability-overview?from=now-15m&to=now&timezone=browser&refresh=5s).
 - Prometheus metrics and alerts.
 - Loki logs.
 - AWS CLI through the local Floci tooling.

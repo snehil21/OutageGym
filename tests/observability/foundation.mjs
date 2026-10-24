@@ -83,26 +83,60 @@ assert.equal(collectorHealth.status, "Server available");
 const grafanaHealth = await requestJson(`${grafanaUrl}/api/health`);
 assert.equal(grafanaHealth.database, "ok");
 
-const dashboard = await requestJson(
-  `${grafanaUrl}/api/dashboards/uid/outagegym-order-processing`,
-);
-assert.equal(dashboard.dashboard.title, "Order Processing Overview");
-const panelTitles = new Set(
-  dashboard.dashboard.panels.map((panel) => panel.title),
-);
+const expectedDashboards = [
+  {
+    panels: [
+      "Order API Throughput",
+      "Order API P95 Latency",
+      "Worker Outcomes",
+      "Queue Depth",
+      "Worker Operational Events",
+      "Correlated Order Timeline",
+    ],
+    title: "Order Processing Overview",
+    uid: "outagegym-order-processing",
+  },
+  {
+    panels: [
+      "Notification Delivery Ratio",
+      "Missing Notifications",
+      "Notification Queue Depth",
+      "Published vs Delivered by Channel",
+      "Notification Worker Outcomes",
+      "Notification Delivery Timeline",
+    ],
+    title: "Notification Delivery Overview",
+    uid: "outagegym-notification-delivery",
+  },
+  {
+    panels: [
+      "Checkout P95 Latency",
+      "Slow Checkout Responses",
+      "Checkout Request Outcomes",
+      "Checkout HTTP Responses",
+      "Worker Processing Outcomes",
+      "Checkout Timeline",
+    ],
+    title: "Checkout Reliability Overview",
+    uid: "outagegym-checkout-reliability",
+  },
+];
 
-for (const title of [
-  "Order API Throughput",
-  "Order API P95 Latency",
-  "Worker Outcomes",
-  "Queue Depth",
-  "Worker Operational Events",
-  "Correlated Order Timeline",
-]) {
-  assert.ok(
-    panelTitles.has(title),
-    `Required dashboard panel is missing: ${title}`,
+for (const expected of expectedDashboards) {
+  const dashboard = await requestJson(
+    `${grafanaUrl}/api/dashboards/uid/${expected.uid}`,
   );
+  assert.equal(dashboard.dashboard.title, expected.title);
+  const panelTitles = new Set(
+    dashboard.dashboard.panels.map((panel) => panel.title),
+  );
+
+  for (const title of expected.panels) {
+    assert.ok(
+      panelTitles.has(title),
+      `Required dashboard panel is missing: ${expected.title} / ${title}`,
+    );
+  }
 }
 
 const ruleResponse = await requestJson(
@@ -198,7 +232,7 @@ console.log(
         name: rule.name,
         state: rule.state,
       })),
-      dashboard: dashboard.dashboard.title,
+      dashboards: expectedDashboards.map((dashboard) => dashboard.title),
       logs: ["order-api", "order-worker"],
       metrics: [
         "outagegym_api_request_count_total",

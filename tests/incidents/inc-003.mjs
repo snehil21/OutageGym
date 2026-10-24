@@ -79,15 +79,18 @@ try {
     "Broken state should not reserve checkout idempotency keys",
   );
 
-  const rules = await requestJson(
-    `${runtimeConfig.prometheusUrl}/api/v1/rules?type=alert`,
-  );
-  const alert = rules.data.groups
-    .flatMap((group) => group.rules)
-    .find((rule) => rule.name === "CheckoutLatencyHigh");
-  assert.ok(alert, "CheckoutLatencyHigh alert is missing");
-  assert.equal(alert.health, "ok");
-  assert.equal(alert.state, "firing");
+  const alert = await eventually(async () => {
+    const rules = await requestJson(
+      `${runtimeConfig.prometheusUrl}/api/v1/rules?type=alert`,
+    );
+    const checkoutAlert = rules.data.groups
+      .flatMap((group) => group.rules)
+      .find((rule) => rule.name === "CheckoutLatencyHigh");
+    assert.ok(checkoutAlert, "CheckoutLatencyHigh alert is missing");
+    assert.equal(checkoutAlert.health, "ok");
+    assert.equal(checkoutAlert.state, "firing");
+    return checkoutAlert;
+  }, "Checkout latency alert");
 
   console.log(
     JSON.stringify(
