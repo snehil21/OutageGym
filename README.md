@@ -65,6 +65,8 @@ path:
 - **Order Processing Overview** for order acceptance and processing.
 - **Notification Delivery Overview** for INC-002 notification routing and
   delivery.
+- **Checkout Reliability Overview** for INC-003 checkout latency, request
+  outcomes, and correlated processing events.
 
 Open the Floci UI at <http://127.0.0.1:4500> to inspect the local AWS resources,
 including queues, messages, tables, and records. Start diagnosis in Grafana,
