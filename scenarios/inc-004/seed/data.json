@@ -1,0 +1,12 @@
+{
+  "orders": [
+    { "productId": "product-inc004-valid-001", "quantity": 1 },
+    { "productId": "product-inc004-valid-002", "quantity": 2 },
+    { "productId": "product-inc004-valid-003", "quantity": 3 },
+    { "productId": "product-inc004-valid-004", "quantity": 4 },
+    { "productId": "product-inc004-valid-005", "quantity": 1 },
+    { "productId": "product-inc004-valid-006", "quantity": 2 },
+    { "productId": "product-inc004-valid-007", "quantity": 3 },
+    { "productId": "product-inc004-valid-008", "quantity": 4 }
+  ]
+}

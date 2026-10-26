@@ -7,7 +7,7 @@ operational evidence, and grades the repaired behaviour without prescribing one
 implementation. Everything runs locally with synthetic data and fake AWS
 credentials.
 
-The first three incidents are usable. Cross-platform beta validation is still
+The first four incidents are usable. Cross-platform beta validation is still
 in progress.
 
 ## How AWS runs locally
@@ -184,7 +184,7 @@ port values. Container-to-container addresses remain unchanged.
 Create and validate a scenario:
 
 ```bash
-make new-incident ID=inc-004
+make new-incident ID=inc-005
 make validate-scenarios
 ```
 
@@ -211,7 +211,7 @@ scenario isolation.
 - [Changelog](CHANGELOG.md)
 - [Floci compatibility results](spikes/floci-compatibility/COMPATIBILITY.md)
 
-The catalogue currently contains `inc-001`, `inc-002`, and `inc-003`.
+The catalogue currently contains `inc-001` through `inc-004`.
 
 ## License
 

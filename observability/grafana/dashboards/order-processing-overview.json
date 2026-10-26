@@ -158,6 +158,11 @@
           "expr": "outagegym_notification_queue_messages",
           "legendFormat": "notification available",
           "refId": "B"
+        },
+        {
+          "expr": "outagegym_worker_dead_letter_queue_messages",
+          "legendFormat": "order dead letter",
+          "refId": "C"
         }
       ],
       "title": "Queue Depth",

@@ -1,0 +1,63 @@
+schema_version: 1
+id: inc-004
+title: Malformed order messages are repeatedly retried
+difficulty:
+  level: intermediate
+  interacting_causes: 2
+  evidence_sources:
+    - alerts
+    - configuration
+    - logs
+    - metrics
+    - resource_state
+  repair_tradeoffs: true
+
+resources:
+  minimum_host:
+    logical_cpu_cores: 4
+    memory_gb: 4
+    free_disk_gb: 6
+  required_services:
+    - floci
+    - grafana
+    - loki
+    - order-api
+    - order-worker
+    - otel-collector
+    - prometheus
+
+documents:
+  brief: brief.md
+  evidence: evidence.md
+  postmortem: postmortem-template.md
+
+system:
+  entrypoint: order-api
+  processing_service: order-worker
+  queue: order-processing
+  store: order-records
+
+commands:
+  start: make start INCIDENT=inc-004
+  status: make status INCIDENT=inc-004
+  workload: make workload INCIDENT=inc-004
+  reset: make reset INCIDENT=inc-004
+  stop: make stop INCIDENT=inc-004
+
+investigation:
+  grafana_url: http://127.0.0.1:3002
+  prometheus_url: http://127.0.0.1:9090
+  loki_url: http://127.0.0.1:3100
+
+initial_signal:
+  type: alert
+  name: OrderProcessingFailuresDetected
+  condition: Repeated processing failures coincide with delayed valid orders
+
+required_outcomes:
+  - valid orders complete within the healthy processing baseline
+  - permanently invalid messages stop retrying after a bounded number of attempts
+  - invalid messages remain available for investigation
+  - invalid messages create no order or fulfilment records
+  - recovery survives an order-worker restart
+  - logs and metrics retain message identifiers and retry outcomes

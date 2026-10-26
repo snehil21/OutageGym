@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 99,
+  "orderId": "inc004-poison-order",
+  "correlationId": "inc004-poison-correlation",
+  "acceptedAt": "2026-10-26T00:00:00.000Z",
+  "productId": "product-inc004-poison",
+  "quantity": 1
+}

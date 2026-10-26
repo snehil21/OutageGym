@@ -16,6 +16,18 @@ export interface MessageDelivery {
   receiveCount: number;
 }
 
+export class MessageProcessingError extends Error {
+  readonly messageId: string;
+  readonly receiveCount: number;
+
+  constructor(delivery: MessageDelivery, cause: unknown) {
+    super("Order message processing failed", { cause });
+    this.name = "MessageProcessingError";
+    this.messageId = delivery.messageId;
+    this.receiveCount = delivery.receiveCount;
+  }
+}
+
 export type ProcessMessage = (
   body: string | undefined,
   delivery: MessageDelivery,
@@ -53,7 +65,13 @@ export const consumeNextMessage = async (
     messageId: message.MessageId,
     receiveCount: Number(message.Attributes?.ApproximateReceiveCount ?? "1"),
   };
-  const processed = await processMessage(message.Body, delivery);
+  let processed: ProcessedOrder;
+
+  try {
+    processed = await processMessage(message.Body, delivery);
+  } catch (error) {
+    throw new MessageProcessingError(delivery, error);
+  }
 
   await sqs.send(
     new DeleteMessageCommand({
