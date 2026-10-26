@@ -54,6 +54,11 @@ export const runtimeConfig = Object.freeze({
     new Set(["floci", ...loopbackHosts]),
     "4566",
   ),
+  orderProcessingDeadLetterQueueUrl: localUrl(
+    "ORDER_PROCESSING_DLQ_URL",
+    new Set(["floci", ...loopbackHosts]),
+    "4566",
+  ),
   orderRecordsTableName: required("ORDER_RECORDS_TABLE_NAME"),
   checkoutRequestsTableName: required("CHECKOUT_REQUESTS_TABLE_NAME"),
   orderCompletionEventBusName: required("ORDER_COMPLETION_EVENT_BUS_NAME"),

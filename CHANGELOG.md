@@ -4,6 +4,8 @@ Notable changes to OutageGym are recorded here.
 
 ## Unreleased
 
+- Added INC-004 poison-message diagnosis, bounded SQS redrive, inspectable
+  dead-letter evidence, and restart-durable behavioural grading.
 - Added an INC-003 checkout reliability dashboard and regression coverage for
   every provisioned Grafana dashboard.
 - Stabilized INC-003 alert verification by allowing Prometheus to complete its

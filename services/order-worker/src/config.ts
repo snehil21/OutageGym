@@ -18,6 +18,7 @@ export interface WorkerConfig {
   healthHost: string;
   healthPort: number;
   orderProcessingQueueUrl: string;
+  orderProcessingDeadLetterQueueUrl: string;
   orderProcessingDurationMs: number;
   orderRecordsTableName: string;
   orderCompletionEventBusName: string | undefined;
@@ -56,6 +57,13 @@ export const loadConfig = (
   orderProcessingQueueUrl: readLocalUrl(
     env,
     "ORDER_PROCESSING_QUEUE_URL",
+    LOCAL_AWS_HOSTS,
+    LOCAL_AWS_PORT,
+    "Floci",
+  ),
+  orderProcessingDeadLetterQueueUrl: readLocalUrl(
+    env,
+    "ORDER_PROCESSING_DLQ_URL",
     LOCAL_AWS_HOSTS,
     LOCAL_AWS_PORT,
     "Floci",

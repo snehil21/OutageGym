@@ -15,7 +15,10 @@ import { startHealthServer } from "./health-server.js";
 import { processOrderMessage } from "./message-processor.js";
 import { publishOrderCompleted } from "./order-event-publisher.js";
 import { completeOrder, recordOrderProcessing } from "./order-repository.js";
-import { consumeNextMessage } from "./queue-consumer.js";
+import {
+  consumeNextMessage,
+  MessageProcessingError,
+} from "./queue-consumer.js";
 
 const bootstrapLogger = createStructuredLogger("order-worker");
 
@@ -95,6 +98,31 @@ const runWorker = async (): Promise<void> => {
     }
   };
   queueMessages.addCallback(observeQueueDepth);
+  const deadLetterQueueMessages = telemetry.meter.createObservableGauge(
+    "outagegym.worker.dead_letter_queue.messages",
+    {
+      description: "Approximate number of quarantined order messages",
+    },
+  );
+  const observeDeadLetterQueueDepth: ObservableCallback = async (
+    observation,
+  ) => {
+    try {
+      const depth = await readQueueDepth(
+        clients.sqs,
+        config.orderProcessingDeadLetterQueueUrl,
+      );
+
+      observation.observe(depth.available);
+    } catch (error) {
+      telemetry.logger.error(
+        "dead_letter_queue_metrics_collection_failed",
+        "Dead-letter queue metrics collection failed",
+        describeError(error),
+      );
+    }
+  };
+  deadLetterQueueMessages.addCallback(observeDeadLetterQueueDepth);
   const healthServer = await startHealthServer({
     host: config.healthHost,
     port: config.healthPort,
@@ -228,12 +256,29 @@ const runWorker = async (): Promise<void> => {
           break;
         }
 
+        const delivery =
+          error instanceof MessageProcessingError
+            ? {
+                messageId: error.messageId,
+                receiveCount: error.receiveCount,
+              }
+            : {};
+        const processingError =
+          error instanceof MessageProcessingError ? error.cause : error;
+
         telemetry.logger.error(
           "message_processing_failed",
           "Message processing failed",
-          describeError(error),
+          {
+            ...delivery,
+            ...describeError(processingError),
+          },
         );
         failureCount.add(1);
+
+        if (error instanceof MessageProcessingError && error.receiveCount > 1) {
+          retryCount.add(1, { result: "failed" });
+        }
         await pause(1_000);
       }
     }
@@ -241,6 +286,7 @@ const runWorker = async (): Promise<void> => {
     process.off("SIGINT", onSigint);
     process.off("SIGTERM", onSigterm);
     queueMessages.removeCallback(observeQueueDepth);
+    deadLetterQueueMessages.removeCallback(observeDeadLetterQueueDepth);
     await healthServer.close();
     clients.destroy();
     telemetry.logger.info("worker_stopped", "Order worker stopped");

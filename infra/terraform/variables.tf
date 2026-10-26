@@ -30,3 +30,23 @@ variable "order_processing_visibility_timeout_seconds" {
     error_message = "order_processing_visibility_timeout_seconds must be from 0 to 43200."
   }
 }
+
+variable "order_processing_dlq_enabled" {
+  description = "Whether the order-processing queue moves repeatedly failing messages to its dead-letter queue."
+  type        = bool
+  default     = false
+}
+
+variable "order_processing_max_receive_count" {
+  description = "Number of deliveries permitted before SQS moves a message to the dead-letter queue."
+  type        = number
+  default     = 3
+
+  validation {
+    condition = (
+      var.order_processing_max_receive_count >= 1 &&
+      var.order_processing_max_receive_count <= 1000
+    )
+    error_message = "order_processing_max_receive_count must be from 1 to 1000."
+  }
+}
