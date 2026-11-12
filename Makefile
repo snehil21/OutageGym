@@ -122,6 +122,7 @@ format-check: install-test-dependencies
 	@$(TERRAFORM_FORMAT) fmt -check -diff
 
 test-grader:
+	@mkdir -p .outagegym/review-baselines
 	@$(COMPOSE) --profile tools build grader judge
 	@$(COMPOSE) --profile tools run --rm --no-deps grader python -m pytest -q tests/test_config.py tests/test_documents.py tests/test_report.py
 	@$(COMPOSE) --profile tools run --rm --no-deps judge python -m pytest -q tests/test_judge.py

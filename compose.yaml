@@ -402,9 +402,23 @@ services:
       - -m
       - outagegym_grader.judge
     volumes:
-      - ./scenarios:/workspace/scenarios:ro
-      - ./.outagegym/review-baselines:/workspace/baseline-scenarios:ro
-      - ./.outagegym:/workspace/.outagegym
+      - type: bind
+        source: ./scenarios
+        target: /workspace/scenarios
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.outagegym/review-baselines
+        target: /workspace/baseline-scenarios
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.outagegym
+        target: /workspace/.outagegym
+        bind:
+          create_host_path: false
     environment:
       INCIDENT_ID: ${INCIDENT_ID:-inc-001}
       AI_JUDGE_PROVIDER: ${AI_JUDGE_PROVIDER:-ollama}
