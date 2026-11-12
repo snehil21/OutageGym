@@ -1,7 +1,12 @@
 import json
 from pathlib import Path
 
-from outagegym_grader.report import build_result, render_terminal
+from outagegym_grader.report import DEFAULT_TEST_PATHS, build_result, render_terminal
+
+
+def test_default_assessment_excludes_ai_judge_tests() -> None:
+    assert "tests/test_judge.py" not in DEFAULT_TEST_PATHS
+    assert "tests/test_order_flow.py" in DEFAULT_TEST_PATHS
 
 
 def test_report_supports_terminal_and_json_output(tmp_path: Path) -> None:

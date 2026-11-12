@@ -3,7 +3,6 @@ from outagegym_grader.aws import create_aws_clients
 from outagegym_grader.config import load_config
 from outagegym_grader.order_api import submit_order
 
-
 EXPECTED_PRODUCT_ID = "product-grader-healthy-001"
 EXPECTED_QUANTITY = 3
 
@@ -27,9 +26,7 @@ def test_submitted_order_reaches_expected_final_state() -> None:
         clients.sqs.close()
         clients.dynamodb.close()
 
-    order = next(
-        record for record in records if record["recordId"]["S"] == "ORDER"
-    )
+    order = next(record for record in records if record["recordId"]["S"] == "ORDER")
     fulfilments = [
         record
         for record in records

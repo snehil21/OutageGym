@@ -1,7 +1,6 @@
+import re
 from dataclasses import dataclass
 from pathlib import Path
-import re
-
 
 WRITTEN_REVIEW_STATUS = "NOT REVIEWED"
 
@@ -57,9 +56,7 @@ def validate_document(
             missing_sections=required_sections,
         )
 
-    headings = set(
-        re.findall(r"^##\s+(.+?)\s*$", path.read_text(), flags=re.MULTILINE)
-    )
+    headings = set(re.findall(r"^##\s+(.+?)\s*$", path.read_text(), flags=re.MULTILINE))
 
     return DocumentResult(
         name=name,

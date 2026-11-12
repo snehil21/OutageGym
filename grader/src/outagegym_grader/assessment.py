@@ -3,7 +3,6 @@ from typing import Any
 
 from botocore.client import BaseClient
 
-
 POLL_INTERVAL_SECONDS = 0.25
 ORDER_COMPLETION_TIMEOUT_SECONDS = 45
 
@@ -90,8 +89,7 @@ def wait_for_completed_order(
             None,
         )
         completed = (
-            order is not None
-            and order.get("status", {}).get("S") == "COMPLETED"
+            order is not None and order.get("status", {}).get("S") == "COMPLETED"
         )
 
         if completed:

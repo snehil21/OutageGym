@@ -29,13 +29,14 @@ jobs:
 
       - name: Validate service source
         run: |
-          make install-test-dependencies INCIDENT=inc-001
-          docker compose -p outagegym-inc-001 -f compose.yaml \
-            --profile tools run --rm node npm run format:check
+          make format-check INCIDENT=inc-001
           docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm node npm run typecheck
           docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm node npm test
+
+      - name: Verify grader unit tests
+        run: make test-grader INCIDENT=inc-001
 
       - name: Verify scenario framework
         run: |
@@ -48,8 +49,6 @@ jobs:
 
       - name: Validate Terraform
         run: |
-          docker compose -p outagegym-inc-001 -f compose.yaml \
-            --profile tools run --rm terraform fmt -check -diff
           docker compose -p outagegym-inc-001 -f compose.yaml \
             --profile tools run --rm \
             --user "$(id -u):$(id -g)" \
