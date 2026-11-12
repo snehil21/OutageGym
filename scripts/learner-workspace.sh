@@ -127,6 +127,27 @@ archive_and_restore() {
   echo "Restored learner workspace baseline for $incident."
 }
 
+export_review_baseline() {
+  initialize "$@"
+  validate_baseline
+
+  baseline=$(sed -n '1p' "$baseline_file")
+  destination=".outagegym/review-baselines/$incident"
+  mkdir -p "$destination"
+
+  for name in evidence.md postmortem-template.md
+  do
+    path="scenarios/$incident/$name"
+
+    if ! git cat-file -e "$baseline:$path" 2>/dev/null; then
+      echo "Error: $path is missing from learner workspace baseline." >&2
+      exit 1
+    fi
+
+    git show "$baseline:$path" >"$destination/$name"
+  done
+}
+
 case "$action" in
   initialize)
     initialize "$@"
@@ -134,8 +155,11 @@ case "$action" in
   reset)
     archive_and_restore "$@"
     ;;
+  export-review-baseline)
+    export_review_baseline "$@"
+    ;;
   *)
-    echo "Usage: $0 initialize|reset INCIDENT" >&2
+    echo "Usage: $0 initialize|reset|export-review-baseline INCIDENT" >&2
     exit 1
     ;;
 esac

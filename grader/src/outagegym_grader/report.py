@@ -1,7 +1,7 @@
 import argparse
+import json
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
-import json
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +13,6 @@ from outagegym_grader.documents import (
     validate_written_artifacts,
 )
 
-
 CHECK_NAMES = {
     "test_aws.py": "Local runtime resources",
     "test_backlog_recovery.py": "Load recovery",
@@ -23,6 +22,8 @@ CHECK_NAMES = {
     "test_order_flow.py": "Order completion",
     "test_report.py": "Assessment consistency",
 }
+
+DEFAULT_TEST_PATHS = [f"tests/{filename}" for filename in CHECK_NAMES]
 
 
 class AssessmentPlugin:
@@ -102,6 +103,9 @@ def run_assessment(test_paths: list[str], scenario_root: Path) -> dict[str, Any]
             plugins=[plugin],
         )
 
+    if exit_code != pytest.ExitCode.OK and not plugin.checks:
+        plugin.checks["Assessment consistency"] = False
+
     return build_result(
         config.incident_id,
         plugin.checks,
@@ -113,8 +117,10 @@ def run_assessment(test_paths: list[str], scenario_root: Path) -> dict[str, Any]
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--format", choices=("terminal", "json"), default="terminal")
-    parser.add_argument("--scenario-root", type=Path, default=Path("/workspace/scenarios"))
-    parser.add_argument("--tests", nargs="+", default=["tests"])
+    parser.add_argument(
+        "--scenario-root", type=Path, default=Path("/workspace/scenarios")
+    )
+    parser.add_argument("--tests", nargs="+", default=DEFAULT_TEST_PATHS)
     arguments = parser.parse_args()
     result = run_assessment(arguments.tests, arguments.scenario_root)
 

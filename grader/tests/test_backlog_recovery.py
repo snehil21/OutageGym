@@ -8,7 +8,6 @@ from outagegym_grader.aws import create_aws_clients
 from outagegym_grader.config import load_config
 from outagegym_grader.order_api import submit_order
 
-
 WORKLOAD_ORDER_COUNT = 6
 WORKLOAD_QUANTITY = 5
 
@@ -52,9 +51,7 @@ def test_bulk_order_backlog_returns_to_baseline() -> None:
                 accepted.order_id,
             )
             order = next(
-                record
-                for record in records
-                if record["recordId"]["S"] == "ORDER"
+                record for record in records if record["recordId"]["S"] == "ORDER"
             )
             fulfilments = [
                 record

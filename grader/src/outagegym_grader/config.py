@@ -1,9 +1,8 @@
-from collections.abc import Mapping
-from dataclasses import dataclass
 import os
 import re
+from collections.abc import Mapping
+from dataclasses import dataclass
 from urllib.parse import urlparse
-
 
 LOCAL_AWS_HOSTS = frozenset({"floci", "localhost", "127.0.0.1"})
 LOCAL_ORDER_API_HOSTS = frozenset({"order-api", "localhost", "127.0.0.1"})

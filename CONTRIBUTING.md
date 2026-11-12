@@ -26,7 +26,11 @@ Learner-visible files must describe symptoms and evidence without revealing plan
 
 ## Before requesting review
 
+- Run `make format` to format the repository.
+- Run `make format-check` to verify formatting without changing files.
 - Run the checks relevant to the changed files.
+- When changing the advisory AI rubric or prompt, run `make eval-judge` with
+  the default local Ollama model.
 - Run `git diff --check`.
 - Confirm the working tree contains no unintended files.
 - Include verification evidence in the pull request.

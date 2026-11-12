@@ -8,8 +8,10 @@
   },
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "make format",
+    "format:check": "make format-check",
+    "format:prettier": "prettier --write .",
+    "format:prettier:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run build --workspace @outagegym/service-core && npm run typecheck --workspaces --if-present"
   },

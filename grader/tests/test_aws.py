@@ -25,7 +25,9 @@ def test_order_processing_queue_is_available(aws_clients: AwsClients) -> None:
     )
 
     queue_arn = response["Attributes"]["QueueArn"]
-    assert queue_arn.endswith(f":{config.order_processing_queue_url.rsplit('/', 1)[-1]}")
+    assert queue_arn.endswith(
+        f":{config.order_processing_queue_url.rsplit('/', 1)[-1]}"
+    )
 
 
 def test_order_records_table_is_available(aws_clients: AwsClients) -> None:

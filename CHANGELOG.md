@@ -4,6 +4,8 @@ Notable changes to OutageGym are recorded here.
 
 ## Unreleased
 
+- Added optional provider-neutral AI review for learner evidence and
+  postmortems, with local Ollama and hosted OpenAI or Anthropic adapters.
 - Added INC-004 poison-message diagnosis, bounded SQS redrive, inspectable
   dead-letter evidence, and restart-durable behavioural grading.
 - Added an INC-003 checkout reliability dashboard and regression coverage for

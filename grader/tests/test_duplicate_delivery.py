@@ -1,5 +1,5 @@
-from datetime import UTC, datetime
 import json
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from outagegym_grader.assessment import wait_for_completed_order
@@ -41,9 +41,7 @@ def test_duplicate_delivery_creates_one_fulfilment() -> None:
         clients.sqs.close()
         clients.dynamodb.close()
 
-    order = next(
-        record for record in records if record["recordId"]["S"] == "ORDER"
-    )
+    order = next(record for record in records if record["recordId"]["S"] == "ORDER")
     fulfilments = [
         record
         for record in records

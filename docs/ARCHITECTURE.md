@@ -48,6 +48,7 @@ flowchart TD
     Hooks --> Terraform[Terraform resources]
     Hooks --> Workload[Deterministic workload]
     Hooks --> Grader[Behavioural grader]
+    Written[Learner evidence and postmortem] --> Judge[Optional read-only AI judge]
 ```
 
 Each scenario owns a manifest, learner brief, fault configuration, lifecycle
@@ -69,6 +70,7 @@ fault logic.
 | Grafana                 | Presents dashboards and investigation views          |
 | k6                      | Produces repeatable workload traffic                 |
 | Grader                  | Verifies repaired behaviour from observable outcomes |
+| AI judge                | Provides advisory review of written reasoning        |
 
 ## Isolation and safety
 
@@ -97,6 +99,8 @@ boundary.
   execution while preserving queue-processing semantics.
 - Tooling runs in pinned containers so learners need only Docker, Git, Make,
   and `curl`.
+- Deterministic behavioural grading remains authoritative; optional AI review
+  is read-only, provider-neutral, versioned, and advisory.
 - Kubernetes, Lambda-specific incidents, hosted sessions, and remote grading
   remain deferred until the local learning workflow is proven.
 

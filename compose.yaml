@@ -342,6 +342,17 @@ services:
     networks:
       - lab
 
+  ruff:
+    image: ghcr.io/astral-sh/ruff:0.17.3-alpine
+    profiles:
+      - tools
+    entrypoint:
+      - ruff
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    network_mode: none
+
   scenario-validator:
     build:
       context: ./scripts/scenario-validator
@@ -357,6 +368,7 @@ services:
     build:
       context: .
       dockerfile: grader/Dockerfile
+      target: grader
     image: outagegym/grader:local
     profiles:
       - tools
@@ -374,6 +386,48 @@ services:
     depends_on:
       floci:
         condition: service_healthy
+    networks:
+      - lab
+
+  judge:
+    build:
+      context: .
+      dockerfile: grader/Dockerfile
+      target: judge
+    image: outagegym/judge:local
+    profiles:
+      - tools
+    command:
+      - python
+      - -m
+      - outagegym_grader.judge
+    volumes:
+      - type: bind
+        source: ./scenarios
+        target: /workspace/scenarios
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.outagegym/review-baselines
+        target: /workspace/baseline-scenarios
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.outagegym
+        target: /workspace/.outagegym
+        bind:
+          create_host_path: false
+    environment:
+      INCIDENT_ID: ${INCIDENT_ID:-inc-001}
+      AI_JUDGE_PROVIDER: ${AI_JUDGE_PROVIDER:-ollama}
+      AI_JUDGE_MODEL: ${AI_JUDGE_MODEL:-qwen3:4b-instruct}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    extra_hosts:
+      - host.docker.internal:host-gateway
     networks:
       - lab
 

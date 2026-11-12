@@ -43,6 +43,13 @@ git push --quiet --set-upstream origin main
 "$repository_root/scripts/learner-workspace.sh" initialize inc-001
 initial_baseline=$(cat .outagegym/state/inc-001/baseline.commit)
 
+printf 'learner evidence\n' >scenarios/inc-001/evidence.md
+printf 'learner postmortem\n' >scenarios/inc-001/postmortem-template.md
+"$repository_root/scripts/learner-workspace.sh" export-review-baseline inc-001
+test "$(cat .outagegym/review-baselines/inc-001/evidence.md)" = "evidence-v1"
+test "$(cat .outagegym/review-baselines/inc-001/postmortem-template.md)" = "postmortem-v1"
+git restore scenarios/inc-001/evidence.md scenarios/inc-001/postmortem-template.md
+
 printf 'product=v2\n' >compose.yaml
 git add compose.yaml
 git commit --quiet -m "product v2"

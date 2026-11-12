@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -37,9 +37,7 @@ def submit_order(
             status_code = response.status
             response_body = response.read()
     except HTTPError as error:
-        raise OrderApiError(
-            f"Order API returned HTTP {error.code}"
-        ) from error
+        raise OrderApiError(f"Order API returned HTTP {error.code}") from error
     except (TimeoutError, URLError) as error:
         raise OrderApiError("Order API request failed") from error
 

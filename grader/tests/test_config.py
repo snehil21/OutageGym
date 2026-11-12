@@ -16,8 +16,7 @@ def local_environment() -> dict[str, str]:
         "INCIDENT_ID": "inc-001",
         "ORDER_API_URL": "http://order-api:3000",
         "ORDER_PROCESSING_QUEUE_URL": (
-            "http://floci:4566/000000000000/"
-            "outagegym-inc-001-order-processing"
+            "http://floci:4566/000000000000/outagegym-inc-001-order-processing"
         ),
         "ORDER_RECORDS_TABLE_NAME": "outagegym-inc-001-order-records",
     }

@@ -142,8 +142,9 @@ processing integrity, restart durability, and required written structure. It
 grades observable behaviour rather than one prescribed code change. An initial
 failure is expected; rerun it after the repair.
 
-Written reasoning remains `NOT REVIEWED` until a person reviews it using this
-rubric:
+The deterministic grader remains authoritative. It deliberately does not infer
+the quality of written reasoning and reports that portion as `NOT REVIEWED`.
+Use this rubric for a human or optional AI review:
 
 | Area                            | Points |
 | ------------------------------- | -----: |
@@ -153,7 +154,36 @@ rubric:
 | Permanent repair                |     20 |
 | Postmortem                      |     15 |
 
-Complete `scenarios/<incident-id>/postmortem-template.md`, then stop the lab:
+Complete `scenarios/<incident-id>/postmortem-template.md` before requesting a
+written review.
+
+### 6. Optionally review the written response with AI
+
+OutageGym can provide advisory feedback on the evidence worksheet and
+postmortem. It does not replace or change the deterministic grading result.
+
+The default provider is a locally running [Ollama](https://ollama.com/) model.
+Copy `.env.example` to `.env`, select an installed model, then run:
+
+```bash
+make review INCIDENT=inc-001
+```
+
+To use a hosted provider, set `AI_JUDGE_PROVIDER` to `openai` or `anthropic`,
+set `AI_JUDGE_MODEL`, and provide only the matching API key in the ignored
+`.env` file. These adapters use the provider APIs; they do not access installed
+Codex or Claude CLI sessions.
+
+The judge is read-only, receives only the scenario brief and learner-written
+changes to the evidence and postmortem templates, and cannot execute tools.
+Unchanged or trivially edited templates are rejected before any model call.
+Its structured result is saved under
+`.outagegym/reviews/<incident-id>/latest.json`. The output records the provider,
+model, prompt and rubric versions, timestamp, and hashes of the reviewed
+documents. Hosted review sends those learner-written changes to the selected
+provider; use Ollama when they must remain local.
+
+After grading and any optional written review, stop the lab:
 
 ```bash
 make stop INCIDENT=inc-001

@@ -10,6 +10,9 @@ WORKLOAD_FILE := $(if $(wildcard workloads/k6/$(INCIDENT).js),$(INCIDENT).js,hap
 HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 TERRAFORM := $(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
+TERRAFORM_FORMAT := $(COMPOSE) --profile tools run --rm --no-deps --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp terraform
+NODE_FORMAT := $(COMPOSE) --profile tools run --rm --no-deps --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node
+RUFF := $(COMPOSE) --profile tools run --rm --no-deps --user "$(HOST_UID):$(HOST_GID)" -e RUFF_CACHE_DIR=/tmp/ruff-cache ruff
 LEARNER_WORKSPACE := ./scripts/learner-workspace.sh
 SCENARIO_VALIDATOR := $(COMPOSE) --profile tools run --rm --build scenario-validator "$(INCIDENT)"
 ALL_SCENARIO_VALIDATOR := $(COMPOSE) --profile tools run --rm --build scenario-validator --all
@@ -17,7 +20,7 @@ SCENARIO_HOOK := ./scripts/scenario-hook.sh "$(INCIDENT)"
 SCENARIO_GRADE_HOOK := scenarios/$(INCIDENT)/hooks/grade.sh
 NEW_SCENARIO_VALIDATOR := INCIDENT_ID="$(ID)" docker compose -p "outagegym-$(ID)" -f compose.yaml --profile tools run --rm --build scenario-validator "$(ID)"
 
-.PHONY: doctor validate-scenarios list new-incident start status stop reset workload grade grade-current-runtime grade-default install-test-dependencies test-e2e test-e2e-current-runtime test-observability test-incident
+.PHONY: doctor validate-scenarios list new-incident start status stop reset workload grade grade-current-runtime grade-default review eval-judge install-test-dependencies format format-check test-grader test-e2e test-e2e-current-runtime test-observability test-incident
 
 doctor:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed or not on PATH."; exit 1; }
@@ -93,8 +96,36 @@ grade-default:
 	@$(COMPOSE) --profile tools run --rm grader python -m outagegym_grader.report --tests tests/test_order_flow.py || { echo "Error: Repair did not survive the order-worker restart."; exit 1; }
 	@echo "OutageGym behavioural assessment passed."
 
+review: doctor
+	@$(LEARNER_WORKSPACE) export-review-baseline "$(INCIDENT)"
+	@mkdir -p .outagegym/reviews
+	@$(COMPOSE) --profile tools build judge || { echo "Error: AI judge image failed to build."; exit 1; }
+	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp judge || { echo "Error: AI written review failed."; exit 1; }
+
+eval-judge:
+	@$(COMPOSE) --profile tools build judge
+	@$(COMPOSE) --profile tools run --rm --no-deps judge python -m outagegym_grader.judge_eval
+
 install-test-dependencies:
 	@$(COMPOSE) --profile tools run --rm --user "$(HOST_UID):$(HOST_GID)" -e HOME=/tmp node npm ci --ignore-scripts
+
+format: install-test-dependencies
+	@$(NODE_FORMAT) npm run format:prettier
+	@$(RUFF) check --fix grader
+	@$(RUFF) format grader
+	@$(TERRAFORM_FORMAT) fmt
+
+format-check: install-test-dependencies
+	@$(NODE_FORMAT) npm run format:prettier:check
+	@$(RUFF) check grader
+	@$(RUFF) format --check grader
+	@$(TERRAFORM_FORMAT) fmt -check -diff
+
+test-grader:
+	@mkdir -p .outagegym/review-baselines
+	@$(COMPOSE) --profile tools build grader judge
+	@$(COMPOSE) --profile tools run --rm --no-deps grader python -m pytest -q tests/test_config.py tests/test_documents.py tests/test_report.py
+	@$(COMPOSE) --profile tools run --rm --no-deps judge python -m pytest -q tests/test_judge.py
 
 test-e2e: start install-test-dependencies test-e2e-current-runtime
 
